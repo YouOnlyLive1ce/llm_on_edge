@@ -20,6 +20,7 @@ class BenchLLM:
         self.pipe=subprocess.Popen([self.executable_server_path, '-m', self.model_path], stdout=subprocess.PIPE)
     def stop_server(self):
         self.pipe.stdout.close()
+        self.pipe.terminate()
     def bench(self):
         headers = {"Content-Type": "application/json"}
         amount=200
@@ -45,5 +46,50 @@ class BenchLLM:
             num=num[3:]
             self.results['ppl'].append(num)
     def save_to_file(self,filename):
-        with open('name.json','w') as json_file:
+        with open(f'{filename}.json','w') as json_file:
             json.dump(self.results,json_file,indent=2)
+    # @staticmethod
+    def compare_results(self, path_to_jsons):
+        import os
+        import pandas as pd
+        import numpy as np
+
+        path_to_jsons = '.'
+        # last df has highest bitwidth and hence used to compare with
+        json_files = [pos_json for pos_json in os.listdir(path_to_jsons) if pos_json.endswith('.json')]
+        dfs=[]
+        for file in json_files:
+            df=pd.read_json(file, orient='index')
+            df = df.transpose()
+            corrected=df['ppl'].str.extract(r'\](\d+\.?\d*)')
+            corrected = corrected[0]  # Extract from DataFrame to Series
+            mask = corrected.isna()
+            corrected[mask] = df['ppl'][mask]
+            df['ppl']=corrected
+            df['accuracy']=pd.to_numeric(df['accuracy'])
+            df['ppl']=pd.to_numeric(df['ppl'])
+            dfs.append(df)
+
+        # flip flags. calc relative to model with best accuracy
+        best_model_idx=np.array([dfs[i]['accuracy'].mean() for i in range(len(dfs))]).argmax()
+        for i in range(len(dfs)):
+            if i==best_model_idx:
+                continue
+            dfs[i]['flips']=(dfs[i]['accuracy']==0.0) & (dfs[best_model_idx]['accuracy']==1.0)
+
+        pd.set_option('display.float_format', '{:0.20f}'.format)
+        result_df=[]
+        for i in range(len(json_files)):
+            result_df.append(
+                {"method":json_files[i],"token/sec":f"{dfs[i]['token/sec'].mean()}+-{dfs[i]['token/sec'].std()}",
+                "accuracy":f"{dfs[i]['accuracy'].mean()}","ppl":f"{dfs[i]['ppl'].mean()}+-{dfs[i]['ppl'].std()}",
+                "flips":f"{dfs[i]['flips'].mean()}"}
+            )
+        result_df=pd.DataFrame(result_df)
+        return result_df
+    def calc_corr(self,result_df):
+        tmp_df=result_df.copy(deep=True)
+        tmp_df['token/sec']=tmp_df['token/sec'].apply(lambda x: float(x.split('+-')[0]))
+        tmp_df['ppl']=tmp_df['ppl'].apply(lambda x: float(x.split('+-')[0]))
+        tmp_df.drop(['method'],axis=1,inplace=True)
+        return tmp_df.corr()
