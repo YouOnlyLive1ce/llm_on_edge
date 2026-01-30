@@ -1,2 +1,4 @@
 overleaf_cookie.txt
 /benchmark_llm/hotpotqa.hf
+benchmark/__pycache__/
+benchmark/hotpotqa.hf/

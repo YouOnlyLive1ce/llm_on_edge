@@ -25,6 +25,7 @@ class BenchLLM:
         headers = {"Content-Type": "application/json"}
         amount=200
         for i in range(amount):
+            print(i)
             row=self.dataset['train'][i]
             # request have question and context titles
             data={ "prompt": row['question']+"".join(row['context']['title']),"n_predict": 256}
@@ -48,7 +49,7 @@ class BenchLLM:
     def save_to_file(self,filename):
         with open(f'{filename}.json','w') as json_file:
             json.dump(self.results,json_file,indent=2)
-    # @staticmethod
+    
     def compare_results(self, path_to_jsons):
         import os
         import pandas as pd
