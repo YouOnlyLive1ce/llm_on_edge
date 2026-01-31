@@ -1,74 +1,72 @@
 params:
-  huggingface_link: "user/model_name"
+  huggingface_link: "HuggingFaceTB/SmolLM2-1.7B-Instruct"
+  model_name: "smollm2_pruned"
   
   pruning_method: "magnitude" # sparsegpt, wanda
   sparsity_ratio: 0.5
   sparsity_type: "unstructured" # 2:4, 4:8
-  save: "./out/smollm2/unstructured/sparsegpt/"
-  save_model: "./out/smollm2/unstructured/sparsegpt/"
+  model_folder: "./out/" # need / in the end
   quantize_method: ["q4_0", "q8_0"] # 
 
 stages:
-  load_model:
+  setup:
     cmd: |
-      python3 scripts/load_model.py --huggingface_link ${huggingface_link}
-    outs: 
-      - models/${huggingface_link}/base/config.json
-      - models/${huggingface_link}/base/model.safetensors
+      git clone https://github.com/locuslab/wanda.git
+      wget https://huggingface.co/datasets/ggml-org/ci/resolve/main/wikitext-2-raw-v1.zip
+      unzip wikitext-2-raw-v1.zip
+      wget -q https://github.com/ggml-org/llama.cpp/releases/download/b7883/llama-b7883-bin-ubuntu-x64.tar.gz
+      tar -xvzf llama-b7883-bin-ubuntu-x64.tar.gz
+      mv llama-b7883 bin_llama
+      git clone https://github.com/ggml-org/llama.cpp.git
+    outs:
+      - llama.cpp/quantize
 
   prune:
     cmd: |
       git clone https://github.com/locuslab/wanda.git || true
-      cd wanda && python main.py \
+      python ./wanda/main.py \
         --model ${huggingface_link} \
         --prune_method ${pruning_method} \
         --sparsity_ratio ${sparsity_ratio} \
         --sparsity_type ${sparsity_type} \
-        --save ${save} \
-        --save_model ${save_model}
+        --save ${model_folder}${model_name}/${sparsity_type}/ \
+        --save_model ${model_folder}${model_name}/${sparsity_type}/
     deps: 
       - models/${huggingface_link}/base
     outs: 
-      - ${save_model}
-
-  setup_llama_cpp:
-    cmd: |
-      wget -q https://github.com/ggml-org/llama.cpp/releases/download/b7883/llama-b7883-bin-ubuntu-x64.tar.gz
-      tar -xzf llama-b7883-bin-ubuntu-x64.tar.gz
-      mv llama-b7883-bin-ubuntu-x64 llama.cpp
-    outs:
-      - llama.cpp/quantize
+      - ${model_folder}${model_name}/${sparsity_type}/
 
   convert_hf_to_gguf:
     cmd: |
-      python llama.cpp/convert_hf_to_gguf.py ${save_model} \
-        --outfile ${save_model}/smolm2-pruned.gguf \
+      python llama.cpp/convert_hf_to_gguf.py ${model_folder}${model_name}/${sparsity_type}/ \
+        --outfile ${model_folder}${model_name}_q16.gguf \
         --outtype f16
     deps:
-      - ${save_model}
+      - ${model_folder}${model_name}/${sparsity_type}/
       - llama.cpp/convert_hf_to_gguf.py
     outs:
-      - ${save_model}/smolm2-pruned-q16.gguf
+      - ${model_folder}${model_name}_q16.gguf
 
   quantize:
     for_each: quantize_method
     cmd: |
-      ./llama.cpp/quantize \
-        ${save_model}/smolm2-pruned.gguf \
-        ${save_model}/smolm2-pruned.${item}.gguf \
+      ./bin_llama/llama-quantize \
+        ${model_folder}${model_name}_q16.gguf \
+        ${model_folder}${model_name}_${item}.gguf \
         ${item}
     deps:
-      - ${save_model}/smolm2-pruned.gguf
-      - llama.cpp/quantize
+      - ${model_folder}${model_name}_q16.gguf
+      - bin_llama/quantize
     outs:
-      - ${save_model}/smolm2-pruned.${item}.gguf
+      - ${model_folder}${model_name}_${item}.gguf
 
   benchmark:
+    for_each: quantize_method
     cmd: |
       python3 benchmark/benchmark.py \
-        --model_dir ${save_model} \
-        --output_dir benchmark/benchmark_results/${huggingface_link}
+        --model-name ${model_name}_${item} \
+        --model-path ${model_folder}${model_name}_${item}.gguf \
     deps:
-      - ${save_model}/smolm2-pruned.q8_0.gguf
+      - ${model_folder}${model_name}_${item}.gguf
     outs:
-      - benchmark/benchmark_results/${huggingface_link}
+      - ./benchmark/benchmark_results/${model_name}_${item}.json
