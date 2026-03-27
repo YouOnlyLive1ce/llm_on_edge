@@ -1,17 +1,17 @@
 params:
-  huggingface_link: "HuggingFaceTB/SmolLM2-1.7B-Instruct"
-  model_name: "smollm2_pruned"
+  huggingface_link: "allenai/OLMo-2-0425-1B-Instruct"
+  model_name: "olmo2"
   
-  pruning_method: "magnitude" # sparsegpt, wanda
-  sparsity_ratio: 0.5
+  pruning_method: ["sparsegpt", "wanda"]
+  sparsity_ratio: [0.2, 0.5]
   sparsity_type: "unstructured" # 2:4, 4:8
   model_folder: "./out/" # need / in the end
-  quantize_method: ["q4_0", "q8_0"] # 
+  quantize_method: ["iq4xs", "q8_0"] # todo: gptqmodel gptq, awq
 
 stages:
   setup:
     cmd: |
-      git clone https://github.com/locuslab/wanda.git
+      git clone https://github.com/YouOnlyLive1ce/wanda.git
       wget https://huggingface.co/datasets/ggml-org/ci/resolve/main/wikitext-2-raw-v1.zip
       unzip wikitext-2-raw-v1.zip
       wget -q https://github.com/ggml-org/llama.cpp/releases/download/b7883/llama-b7883-bin-ubuntu-x64.tar.gz
@@ -22,6 +22,8 @@ stages:
       - llama.cpp/quantize
 
   prune:
+    for each: pruning_method
+    for each: sparsity_ratio
     cmd: |
       git clone https://github.com/locuslab/wanda.git || true
       python ./wanda/main.py \
