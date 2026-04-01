@@ -1,0 +1,98 @@
+params:
+  huggingface_link: "HuggingFaceTB/SmolLM2-1.7B-Instruct"
+  huggingface_link_pruned: "nothingisenough/smollm2-wanda-05" # shortcut for prune stage, else "false"
+  model_name: "smollm2"
+  
+  pruning_method: "wanda"
+  sparsity_ratio: 0.5
+  sparsity_type: "unstructured" # 2:4, 4:8
+  model_folder: "./out" # folder with optimized ggufs
+  quantize_method: ["IQ4_XS", "Q8_0"] # todo: gptqmodel gptq, awq
+
+stages:
+  setup:
+    cmd: |
+      git clone https://github.com/YouOnlyLive1ce/wanda.git
+      wget https://huggingface.co/datasets/ggml-org/ci/resolve/main/wikitext-2-raw-v1.zip
+      unzip wikitext-2-raw-v1.zip
+      git clone https://github.com/ggml-org/llama.cpp.git
+      wget -q https://github.com/ggml-org/llama.cpp/releases/download/b7883/llama-b7883-bin-ubuntu-x64.tar.gz
+      tar -v llama-b7883-bin-ubuntu-x64.tar.gz
+      mv llama-b7883 ./llama.cpp/bin
+    outs:
+      - ./llama.cpp/build/bin/llama-quantize
+
+  prune:
+    cmd: |
+      # get pruned safetensors
+      if [ "${huggingface_link_pruned}" != "false" ]; then
+        hf download ${huggingface_link_pruned} --local-dir ${model_folder}/${model_name}/${sparsity_type}/${pruning_method}/${sparsity_ratio}/
+      else
+        # Run pruning if no pre-pruned model is provided. Logs are not visible here, need to wait ~15min. See nvidia-smi for load
+        python ./wanda/main.py \
+          --model ${huggingface_link} \
+          --prune_method ${pruning_method} \
+          --sparsity_ratio ${sparsity_ratio} \
+          --sparsity_type ${sparsity_type} \
+          --save ${model_folder}/${model_name}/${sparsity_type}/${pruning_method}/${sparsity_ratio}/ \
+          --save_model ${model_folder}/${model_name}/${sparsity_type}/${pruning_method}/${sparsity_ratio}/
+      fi
+      # get original safetensors
+      hf download ${huggingface_link} --local-dir ${model_folder}/${model_name}/original/
+    outs: 
+      - ${model_folder}/${model_name}/${sparsity_type}/${pruning_method}/${sparsity_ratio}/
+      - ${model_folder}/${model_name}/original/
+
+  convert_hf_to_gguf:
+    cmd: |
+      python llama.cpp/convert_hf_to_gguf.py ${model_folder}/${model_name}/original/ \
+        --outfile ${model_folder}/${model_name}/${model_name}_q16.gguf \
+        --outtype f16
+      python llama.cpp/convert_hf_to_gguf.py ${model_folder}/${model_name}/${sparsity_type}/${pruning_method}/${sparsity_ratio}/ \
+        --outfile ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_q16.gguf \
+        --outtype f16
+    deps:
+      - ${model_folder}/${model_name}/original/
+      - ${model_folder}/${model_name}/${sparsity_type}/${pruning_method}/${sparsity_ratio}/
+      - llama.cpp/convert_hf_to_gguf.py
+    outs:
+      - ${model_folder}/${model_name}/${model_name}_q16.gguf
+      - ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_q16.gguf
+
+  quantize:
+    for_each: quantize_method
+    # quantize pruned model with $item method
+    # quantize original model with $item method
+
+    cmd: |
+      ./llama.cpp/build/bin/llama-quantize \
+        ${model_folder}/${model_name}/${model_name}_q16.gguf \
+        ${model_folder}/${model_name}/${model_name}_${item}.gguf \
+        ${item}
+      ./llama.cpp/build/bin/llama-quantize \
+        ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_q16.gguf \
+        ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}.gguf \
+        ${item}
+    deps:
+      - ${model_folder}/${model_name}/${model_name}_q16.gguf
+      - ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_q16.gguf
+      - ./llama.cpp/build/bin/llama-quantize
+    outs:
+      - ${model_folder}/${model_name}/${model_name}_${item}.gguf
+      - ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}.gguf
+
+  benchmark:
+    for_each: quantize_method
+    cmd: |
+      python3 ./llm_on_edge/benchmark/benchmark.py\
+        --model-path ${model_folder}/${model_name}/${model_name}_${item}.gguf\
+        --out-file ${model_folder}/benchmark_results/${model_name}/${model_name}_${item}
+      python3 ./llm_on_edge/benchmark/benchmark.py\
+        --model-path ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}.gguf\
+        --out-file ${model_folder}/benchmark_results/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}
+    deps:
+      - ${model_folder}/${model_name}/${model_name}_${item}.gguf
+      - ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}.gguf
+    outs:
+      - ${model_folder}/benchmark_results/${model_name}/${model_name}_${item}
+      - ${model_folder}/benchmark_results/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}.json
