@@ -1,90 +1,128 @@
 from datasets import load_dataset
-import subprocess
 import requests
 import json
-# from memory_profiler import memory_usage
+import time
 
-class BenchLLM:
-    def __init__(self,serv_path,ppl_path,model_path):
-        self.executable_server_path=serv_path
-        self.executable_ppl_path=ppl_path
-        self.model_path=model_path
+class BenchLLMClient:
+    def __init__(self,server_url):
+        self.model_id=None
+        self.server_type=None
         self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
-        self.pipe=None
-        self.results={'token/sec':[],
-                      'accuracy':[],
-                      'ppl':[],
-                      'flips':[],
-                      'prompt_per_second':[],
-                      'predicted_per_second':[]
-                      }
-    def start_server(self):
-        # pipe have response, statistics
-        self.pipe=subprocess.Popen([self.executable_server_path, '-m', self.model_path, '--port','8081'], stdout=subprocess.PIPE)
-        # self.memory_usage=memory_usage(self.pipe, interval=60,multiprocess=True)
+        self.pipe=None # automatic server setup
+        self.results={
+                        'accuracy':[],
+                        'ppl':[],
+                        'flips':[],
+                        'prompt_per_second':[],
+                        'predicted_per_second':[]
+                    }
+        self.server_url=server_url
+    
+    def start_server(self,model_id):
+        self.server_type="llama.cpp" if "gguf" in self.model_id else "gptqmodel"
+        headers = {"Content-Type": "application/json"}
+        data={"model_id":model_id,"server_type":self.server_type,"status":"start"}
+        print(requests.post(f'{self.server_url}/server_setup',headers=headers,json=data).json())
+        # wait for response setup?
     
     def stop_server(self):
-        self.pipe.stdout.close()
-        self.pipe.terminate()
-        # print(self.memory_usage)
-        
-    def bench(self):
         headers = {"Content-Type": "application/json"}
-        amount=200
-        # hotpotqa is a fact knowledge checking dataset. if any of words from response is in target, count as correct
+        data={"server_type":self.server_type,"status":"stop"}
+        print(requests.post(f'{self.server_url}/server_setup',headers=headers,json=data).json())
+        
+    def bench_accuracy(self):
+        headers = {"Content-Type": "application/json"}
+        amount = 200
+
         for i in range(amount):
             print(i)
-            row=self.dataset['validation'][i]
-            # request have question and context titles
-            data={ "prompt": "Topic: "+" ".join(row['context']['title'])+" Question: "+row['question']+ " Your answer: ","n_predict": 64}
-            response=requests.post('http://localhost:8081/completion',headers=headers,json=data).json()
+            row = self.dataset['validation'][i]
+            conversation = [
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant"
+                },
+                {
+                    "role": "user",
+                    "content": "Hello"
+                },
+                {
+                    "role": "assistant",
+                    "content": "Hello! How can I assist you today?"
+                },
+                {
+                    "role": "user",
+                    "content": f"Question context: {" ".join(row['context']['title'])}. \
+                                Answer my question: {row['question']}. Correct answer:"
+                },
+            ]
+            
+            data = {
+                "messages": conversation,
+                "max_tokens": 64,
+                "temperature": 0.05,
+                "repetition_penalty":1.1,
+            }
+            
+            response = requests.post(f"{self.server_url}/bench_v1_chat_completions", 
+                                    headers=headers, 
+                                    json=data).json()
+            
             # save stats
-            self.results['token/sec'].append(response['timings']['predicted_per_second'])
-            self.results['prompt_per_second'].append(response['timings']['prompt_per_second'])
-            self.results['predicted_per_second'].append(response['timings']['predicted_per_second'])
-            self.results['accuracy'].append(any(word in response['content'].split() for word in row['answer'].split()))
             print(response)
-        self.stop_server()
-        
-        ppl_pipe=subprocess.Popen(
-            [self.executable_ppl_path, '-m', self.model_path, '--chunks', str(amount), '-f', '/mnt/d/Inno/Thesis/llama.cpp/wikitext-2-raw/wiki.test.raw'], 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        stdout,stderr=ppl_pipe.communicate()
-        ppl_res=stdout[stdout.find('minutes'):stdout.rfind('estimate')]
-        for num in ppl_res.split(',')[:-1]:
-            num=num[3:]
-            self.results['ppl'].append(num)
+            answer = response['choices'][0]['message']['content'].strip()
+            self.results['accuracy'].append(any(word in answer.split() for word in row['answer'].split()))
+            self.results['prompt_per_second'].append(response['timings']['prompt_per_second'])
+            self.results['predicted_per_second'].append(response['timings']['predicted_per_second'])                
+    
+    def bench_perplexity(self):
+        # Setup data
+        with open("./wikitext-2-raw/wiki.test.raw") as f:
+            raw_texts=f.readlines()
+        texts=[]
+        for i in range(len(raw_texts)):
+            if len(raw_texts[i])>40:
+                texts.append(raw_texts[i][:8000])
+        headers = {"Content-Type": "application/json"}
+        data = {
+            "server_type":self.server_type,
+            "texts":texts
+        }
+        response = requests.post(f"{self.server_url}/bench_perplexity", 
+                                headers=headers, 
+                                json=data).json()
+        self.results['ppl']=response
     
     def save_to_file(self,filename):
         import os
         os.makedirs(os.path.dirname(f'./{filename}.json'), exist_ok=True)
         with open(f'./{filename}.json','w') as json_file:
             json.dump(self.results,json_file,indent=2)
+        self.results={'accuracy':[],'ppl':[],'flips':[],'prompt_per_second':[],'predicted_per_second':[]}
     
     def compare_results(self, path_to_jsons, base_model_file_name):
         import os
         import pandas as pd
         import numpy as np
-        import scipy.stats  # for p-value calculation
+        import scipy.stats
 
-        # last df has highest bitwidth and hence used to compare with
         json_files = [pos_json for pos_json in os.listdir(path_to_jsons) if pos_json.endswith('.json')]
         print(f"json_files: {json_files}")
         dfs = []
         for file in json_files:
             df = pd.read_json(path_to_jsons + "/" + file, orient='index')
             df = df.transpose()
-            corrected = df['ppl'].str.extract(r'\](\d+\.?\d*)')
-            corrected = corrected[0]  # Extract from DataFrame to Series
-            mask = corrected.isna()
-            corrected[mask] = df['ppl'][mask]
-            df['ppl'] = corrected
+            if df['ppl'].dtype==object: #todo remove if
+                corrected = df['ppl'].str.extract(r'\](\d+\.?\d*)')
+                corrected = corrected[0]  # Extract from DataFrame to Series
+                mask = corrected.notna()
+                df.loc[mask, 'ppl'] = corrected[mask]
+                df['ppl'] = pd.to_numeric(df['ppl'], errors='coerce')
+            df[~np.isfinite(df['ppl'])]=df[np.isfinite(df['ppl'])].mean() 
             df['accuracy'] = pd.to_numeric(df['accuracy'])
             df['ppl'] = pd.to_numeric(df['ppl'])
             dfs.append(df)
+            print(df['accuracy'].notna().sum(),df['ppl'].notna().sum())
 
         # Find index of the base model
         base_model_idx = None
@@ -119,19 +157,20 @@ class BenchLLM:
                     return "NaN"
                 return f"{series.mean():.2f}+-{series.std():.2f}"
 
-            # Compute metrics on good rows only
-            ppl_str = mean_std(df_good['ppl'])
+            # do not count 0 generated tokens with 1000000 tok/sec
+            ppl_str = mean_std(df['ppl'])
             prefill_str = mean_std(df_good['prompt_per_second'])
             decode_str = mean_std(df_good['predicted_per_second'])
-            accuracy_mean = df_good['accuracy'].mean()
-            flips_mean = df_good['flips'].mean()
+            # do count 0 generated tokens as fail
+            accuracy_mean = df['accuracy'].sum()/df['accuracy'].notna().sum()
+            flips_mean = df['flips'].sum()/df['accuracy'].notna().sum()
 
             # McNemar's test p-value relative to base model
             if i == base_model_idx:
                 p_value = np.nan
             else:
                 base_acc = dfs[base_model_idx][~fail_mask]['accuracy']
-                curr_acc = df_good['accuracy']
+                curr_acc = df['accuracy']
                 # Contingency table:
                 # a: both correct
                 # b: base correct, current incorrect (flips)
@@ -139,6 +178,8 @@ class BenchLLM:
                 # d: both incorrect
                 b = ((base_acc == 1) & (curr_acc == 0)).sum()
                 c = ((base_acc == 0) & (curr_acc == 1)).sum()
+                print("correct->incorrect",b)
+                print("incorrect->correct",c)
                 if b + c == 0:
                     p_value = np.nan
                 else:
@@ -154,7 +195,7 @@ class BenchLLM:
                 # "memory": memory_str,
                 "flips": f"{flips_mean:.2f}",
                 "fail": f"{fail_count/df['accuracy'].size:.2f}",
-                "p_value": f"{p_value:.2f},n={df_good['accuracy'].size}"
+                "p_value": f"{p_value:.2f},n={df['accuracy'].notna().sum()}"
             })
 
         result_df = pd.DataFrame(result_df)
@@ -200,15 +241,17 @@ if __name__ =="__main__":
     import argparse
     import time
     parser = argparse.ArgumentParser(description="Execute the model optimization pipeline")
-    parser.add_argument("--out-file", help="where to save benchmark results")
-    parser.add_argument("--serv-path",default="./llama.cpp/build/bin/llama-server")
-    parser.add_argument("--ppl-path", default="./llama.cpp/build/bin/llama-perplexity")
-    parser.add_argument("--model-path", help="Path to gguf file")
+    parser.add_argument("--outs-path", help="where to save benchmark results")
+    parser.add_argument("--server-url",default="http://localhost:8080")
     args = parser.parse_args()
     
-    benchllm=BenchLLM(args.serv_path,args.ppl_path,args.model_path)
-    time.sleep(60) # wait for previous model free memory
-    benchllm.start_server()
-    time.sleep(360) # wait for model to load
-    benchllm.bench() # stop server itself
-    benchllm.save_to_file(f'./{args.out_file}')
+    # parse all models
+    models=[]
+    client=BenchLLMClient(args.server_url)
+    for model in models:
+        client.start_server(model)
+        time.sleep(300) # wait for model to load
+        client.bench_accuracy()
+        client.bench_perplexity()
+        client.save_to_file(f'./{args.out_file}')
+        client.stop_server()

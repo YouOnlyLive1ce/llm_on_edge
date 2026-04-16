@@ -94,5 +94,5 @@ stages:
       - ${model_folder}/${model_name}/${model_name}_${item}.gguf
       - ${model_folder}/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}.gguf
     outs:
-      - ${model_folder}/benchmark_results/${model_name}/${model_name}_${item}
+      - ${model_folder}/benchmark_results/${model_name}/${model_name}_${item}.json
       - ${model_folder}/benchmark_results/${model_name}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}.json
