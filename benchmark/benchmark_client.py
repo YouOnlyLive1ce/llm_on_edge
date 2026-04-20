@@ -8,7 +8,6 @@ class BenchLLMClient:
         self.model_id=None
         self.server_type=None
         self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
-        self.pipe=None # automatic server setup
         self.results={
                         'accuracy':[],
                         'ppl':[],
@@ -19,20 +18,25 @@ class BenchLLMClient:
         self.server_url=server_url
     
     def start_server(self,model_id):
+        self.model_id=model_id
         self.server_type="llama.cpp" if "gguf" in self.model_id else "gptqmodel"
         headers = {"Content-Type": "application/json"}
         data={"model_id":model_id,"server_type":self.server_type,"status":"start"}
-        print(requests.post(f'{self.server_url}/server_setup',headers=headers,json=data).json())
+        requests.post(f'{self.server_url}/server_setup',headers=headers,json=data)
+        print(f"start server {model_id} with {self.server_type} framework")
         # wait for response setup?
     
     def stop_server(self):
         headers = {"Content-Type": "application/json"}
         data={"server_type":self.server_type,"status":"stop"}
-        print(requests.post(f'{self.server_url}/server_setup',headers=headers,json=data).json())
+        requests.post(f'{self.server_url}/server_setup',headers=headers,json=data)
+        self.model_id=None
+        self.server_type=None
+        self.results={'accuracy':[],'ppl':[],'flips':[],'prompt_per_second':[],'predicted_per_second':[]}
         
     def bench_accuracy(self):
         headers = {"Content-Type": "application/json"}
-        amount = 200
+        amount = 2
 
         for i in range(amount):
             print(i)
@@ -64,41 +68,54 @@ class BenchLLMClient:
                 "repetition_penalty":1.1,
             }
             
-            response = requests.post(f"{self.server_url}/bench_v1_chat_completions", 
+            response = requests.get(f"{self.server_url}/bench_v1_chat_completions", 
                                     headers=headers, 
                                     json=data).json()
             
             # save stats
             print(response)
-            answer = response['choices'][0]['message']['content'].strip()
+            answer = response['chat']['content']
             self.results['accuracy'].append(any(word in answer.split() for word in row['answer'].split()))
-            self.results['prompt_per_second'].append(response['timings']['prompt_per_second'])
-            self.results['predicted_per_second'].append(response['timings']['predicted_per_second'])                
+            self.results['prompt_per_second'].append(response['prompt_per_second'])
+            self.results['predicted_per_second'].append(response['predicted_per_second'])
     
     def bench_perplexity(self):
         # Setup data
-        with open("./wikitext-2-raw/wiki.test.raw") as f:
-            raw_texts=f.readlines()
-        texts=[]
-        for i in range(len(raw_texts)):
-            if len(raw_texts[i])>40:
-                texts.append(raw_texts[i][:8000])
-        headers = {"Content-Type": "application/json"}
+        with open("./llama.cpp/wikitext-2-raw/wiki.test.raw") as f:
+            raw_texts = f.readlines()
+        
+        texts = []
+        for line in raw_texts:
+            if len(line) > 40:
+                texts.append(line[:8000])
+        
         data = {
-            "server_type":self.server_type,
-            "texts":texts
+            "texts": texts,
+            "amount": 2
         }
-        response = requests.post(f"{self.server_url}/bench_perplexity", 
-                                headers=headers, 
-                                json=data).json()
-        self.results['ppl']=response
+        
+        print("start ppl")
+        try:
+            response = requests.post(  # Changed to POST
+                f"{self.server_url}/bench_perplexity",
+                json=data,
+            )
+            response.raise_for_status()  # Raise exception for bad status codes
+            result = response.json()
+            print("end ppl")
+            self.results['ppl'].append(result)
+        except requests.exceptions.Timeout:
+            print("Request timed out after 300 seconds")
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}")
+            if hasattr(e.response, 'text'):
+                print(f"Response: {e.response.text}")
     
     def save_to_file(self,filename):
         import os
         os.makedirs(os.path.dirname(f'./{filename}.json'), exist_ok=True)
         with open(f'./{filename}.json','w') as json_file:
             json.dump(self.results,json_file,indent=2)
-        self.results={'accuracy':[],'ppl':[],'flips':[],'prompt_per_second':[],'predicted_per_second':[]}
     
     def compare_results(self, path_to_jsons, base_model_file_name):
         import os
@@ -240,18 +257,26 @@ class BenchLLMClient:
 if __name__ =="__main__":
     import argparse
     import time
+    from pathlib import Path
+    
     parser = argparse.ArgumentParser(description="Execute the model optimization pipeline")
-    parser.add_argument("--outs-path", help="where to save benchmark results")
+    parser.add_argument("--models-path", default="./out/smollm2", help="where models are")
+    parser.add_argument("--results-path", default="./out/benchmark_results2", help="where results are")
     parser.add_argument("--server-url",default="http://localhost:8080")
     args = parser.parse_args()
     
-    # parse all models
-    models=[]
+    folder_path = Path(args.models_path)
+    # run all ggufs (original_q16, pruned_q16, pruned_qX) and /quantized/model_{gptq|awq}X.safetensors
+    models = [str(path) for path in folder_path.rglob("*.gguf")] + [str(path.parent) for path in folder_path.joinpath("quantized").rglob("*.safetensors")]
+    print(f"models found: {models}")
+    # models also can be hf link for remote server
+    
     client=BenchLLMClient(args.server_url)
     for model in models:
         client.start_server(model)
         time.sleep(300) # wait for model to load
         client.bench_accuracy()
         client.bench_perplexity()
-        client.save_to_file(f'./{args.out_file}')
+        client.save_to_file(f'./{args.results_path}/{client.model_id}')
         client.stop_server()
+        time.sleep(100)
