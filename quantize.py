@@ -1,10 +1,10 @@
 import argparse
 import subprocess
 from pathlib import Path
-from gptqmodel import GPTQModel, QuantizeConfig, get_best_device, BACKEND
-from gptqmodel.quantization import METHOD
-from transformers import AutoTokenizer
-from datasets import load_dataset
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Execute quantization pipelines")
@@ -28,8 +28,9 @@ if __name__=="__main__":
             method="Q8_0"
         
         for gguf in ggufs:
-            cmd=["./llama.cpp/build/bin/llama-quantize", str(gguf), f"{args.out_folder}/{str(gguf.stem)[:-3]+method+".gguf"}", method]
+            cmd=f"./llama.cpp/build/bin/llama-quantize {str(gguf)} {args.out_folder}/{str(gguf.stem)[:-3]+method+".gguf"} {method}"
             print(cmd)
+            # Use shell=True to handle multi-line commands and pipes
             process = subprocess.Popen(
                 cmd,
                 shell=True,
@@ -39,15 +40,31 @@ if __name__=="__main__":
                 bufsize=1,
                 executable='/bin/bash'
             )
+            # Stream output in real-time
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    print(f"{line.rstrip()}")
+                    logger.debug(f"{line.rstrip()}")
+            
+            return_code = process.wait()            
+            if return_code != 0:
+                logger.error(f"Stage quantize failed with exit code {return_code}")
+            else:
+                logger.info(f"Stage quantize completed successfully")
+    
     elif args.quantize_method=="gptq" or args.quantize_method=="awq":
+        from datasets import load_dataset
         calibration_dataset = load_dataset(
             "allenai/c4",
             data_files="en/c4-train.00001-of-01024.json.gz",
             split="train"
         ).select(range(1024))["text"]
+        from gptqmodel import GPTQModel, QuantizeConfig, BACKEND
+        from gptqmodel.quantization import METHOD
+        from transformers import AutoTokenizer
         
-        model_path=str(args.input_folder)
-        out_folder=str(args.out_folder)
+        model_path=args.input_folder
+        model_name=next(Path(model_path).rglob("*.gguf")).stem
         quant_method=METHOD.GPTQ if args.quantize_method=="gptq" else METHOD.AWQ
         tokenizer=AutoTokenizer.from_pretrained(model_path)
         quant_config = QuantizeConfig(
@@ -57,4 +74,4 @@ if __name__=="__main__":
         )
         model=GPTQModel.load(model_path,quantize_config=quant_config, device="cuda:0") # quantize with gpu
         model.quantize(calibration=calibration_dataset, backend=BACKEND.TORCH)
-        model.save(out_folder)    
+        model.save(f"{args.out_folder}")

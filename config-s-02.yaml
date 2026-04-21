@@ -1,6 +1,6 @@
 params:
-  huggingface_link: "allenai/OLMo-2-0425-1B-Instruct"
-  huggingface_link_pruned: "nothingisenough/olmo2-sparsegpt-02" # shortcut for prune stage, else "false"
+  huggingface_link: "HuggingFaceTB/SmolLM2-1.7B-Instruct"
+  huggingface_link_pruned: "nothingisenough/smollm2-sparsegpt-02" # shortcut for prune stage, else "false"
   # huggingface_link_quantized: "nothingisenough/smollm2-sparsegpt-02-gptq-4" # shortcut for quantize stage, else "false"
   model_name: "smollm2"
 
@@ -19,8 +19,9 @@ stages:
       unzip wikitext-2-raw-v1.zip
       git clone https://github.com/ggml-org/llama.cpp.git
       wget -q https://github.com/ggml-org/llama.cpp/releases/download/b7883/llama-b7883-bin-ubuntu-x64.tar.gz
-      tar -v llama-b7883-bin-ubuntu-x64.tar.gz
-      mv llama-b7883 ./llama.cpp/bin
+      mkdir ./llama.cpp/build
+      mkdir ./llama.cpp/build/bin
+      tar -vxf llama-b7883-bin-ubuntu-x64.tar.gz -C ./llama.cpp/build/bin --strip-components=1
     outs:
       - ./llama.cpp/build/bin/llama-quantize
       # gptqmodel python lib
@@ -59,7 +60,6 @@ stages:
         ${model_folder}/${model_name}/pruned/${sparsity_type}/${pruning_method}/${sparsity_ratio}/ \
           --outfile ${model_folder}/${model_name}/pruned/${sparsity_type}/${pruning_method}/${sparsity_ratio}/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_q16.gguf \
           --outtype f16
-      else
       fi
     deps:
       - ${model_folder}/${model_name}/original/
@@ -76,6 +76,8 @@ stages:
     # quantize pruned model with $item method
     # save to separate folder
     cmd: |
+      mkdir -p ${model_folder}/${model_name}/quantized/${model_name}_${sparsity_type}_${pruning_method}_${sparsity_ratio}_${item}_${quantize_bpw}/
+      mkdir -p ${model_folder}/${model_name}/quantized/${model_name}_${item}_${quantize_bpw}/
       python3 ./llm_on_edge/quantize.py \
         ${model_folder}/${model_name}/original/ \
         ${model_folder}/${model_name}/quantized/${model_name}_${item}_${quantize_bpw}/ \
@@ -100,7 +102,7 @@ stages:
   # need to manually run benchmark_server.py in other shell or remote
     cmd: |
       python3 ./llm_on_edge/benchmark/benchmark_client.py \
-        --outs-path ${model_folder}/benchmark_results/${model_name}/ \
+        --models-path ${model_folder}/${model_name}/quantized
     
     deps:
       - ${model_folder}/${model_name}/

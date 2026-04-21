@@ -3,14 +3,11 @@ import subprocess
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import List
-# from gptqmodel import GPTQModel
-import json
 import gc
-# import evaluate
-import requests
+import evaluate
 from openai import OpenAI
-import time
 from fastapi import HTTPException
+from gptq_speed import gptqmodel_speed
 
 class RoleContent(BaseModel):
     role: str
@@ -45,7 +42,9 @@ class BenchLLMServer:
         self.fastapi_port=fastapi_port # exposed for external requests
         self.llm_port=llm_port # only for internal requests
         self.llm_openai_client=None
-        self.pipe=None # automatic server setup
+        self.llm_pipe=None # automatic server setup
+        self.gptqmodel=None # need for measuring speed
+        
         self.results={
                         'accuracy':[],
                         'ppl':[],
@@ -56,33 +55,48 @@ class BenchLLMServer:
     
     def start_llm_server(self,request):
         self.model_id=request.get("model_id")
+        print(self.model_id)
         if request.get("server_type")=="llama.cpp":
             # llamacpp gguf bench
             self.server_type="llama.cpp"
-            self.pipe=subprocess.Popen([self.executable_server_path, '-m', self.model_id, '--port',self.llm_port], stdout=subprocess.PIPE)
+            self.llm_pipe=subprocess.Popen([self.executable_server_path, '-m', self.model_id, '--port',self.llm_port], stdout=subprocess.PIPE)
 
         elif request.get("server_type")=="gptqmodel":
             # gptqmodel safetensors bench
             self.server_type="gptqmodel"
-            self.model=GPTQModel.load(self.model_id,device="cpu")
-            self.model.serve(host="0.0.0.0",port=self.llm_port,async_mode=True)
-        self.setup_openai_client()
+            from gptqmodel import GPTQModel, BACKEND
+            self.gptqmodel=GPTQModel.load(self.model_id,device="cpu")#,device="cuda:0", backend=BACKEND.TRITON)
+            # need to run separate process because current is blocked by fastapi uvicorn loop
+            self.llm_pipe = subprocess.Popen(
+                [
+                    "python", "-c",
+                    "from gptqmodel import GPTQModel, BACKEND; "
+                    f"model = GPTQModel.load('{self.model_id}', device='cuda:0',backend=BACKEND.TRITON); "
+                    f"model.serve(host='0.0.0.0', port={self.llm_port}, async_mode=True)"
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
     
     def stop_llm_server(self):
         if self.server_type=="llama.cpp":
             self.model_id=None
             self.llm_openai_client=None
-            self.pipe.stdout.close()
-            self.pipe.terminate()
-            self.pipe=None
+            self.llm_pipe.stdout.close()
+            self.llm_pipe.terminate()
+            self.llm_pipe=None
             self.server_type=None
         elif self.server_type=="gptqmodel":
             self.model_id=None
             self.llm_openai_client=None
-            self.model.serve_shutdown()
-            self.model=None
+            self.llm_pipe.stdout.close()
+            self.llm_pipe.terminate()
             self.model_id=None
             self.server_type=None
+            self.gptqmodel=None
+        gc.collect()
+        import torch
+        torch.cuda.empty_cache()
         gc.collect()
     
     def setup_openai_client(self):
@@ -109,58 +123,55 @@ class BenchLLMServer:
             max_tokens=request.max_tokens
         )
         clean_response={}
-        clean_response['chat']={'content':response.choices[0].message.content,
-                                'role':response.choices[0].message.role}
-        clean_response['prompt_per_second']=response.timings['prompt_per_second']
-        clean_response['predicted_per_second']=response.timings['predicted_per_second']
-        # todo: gptqmodel
+        clean_response['chat']={'content':response.choices[0].message.content if response.choices[0].message else "",
+                                'role':response.choices[0].message.role if response.choices[0].message else ""}
+        if benchllmserver.server_type=="llama.cpp":
+            clean_response['prompt_per_second']=response.timings['prompt_per_second']
+            clean_response['predicted_per_second']=response.timings['predicted_per_second']
+        # manually bench speed for gptqmodel
+        elif benchllmserver.server_type=="gptqmodel":
+            message=f"{request.messages[-2].content} {request.messages[-1].content}"
+            response_speed=gptqmodel_speed(benchllmserver.gptqmodel,message)
+            clean_response['prompt_per_second']=response_speed.prompt_per_second[0]
+            clean_response['predicted_per_second']=response_speed.predicted_per_second[0]
+        print(clean_response)
         return clean_response
     
-    @app.post("/bench_perplexity")  # Use POST for request body
+    @app.post("/bench_perplexity")
     async def bench_perplexity(request: PerplexityRequest):
-        try:
-            if benchllmserver.server_type == "llama.cpp":
-                # Write texts to temp file
-                temp_file = "./wikitext.txt"
-                with open(temp_file, "w", encoding='utf-8') as f:
-                    f.writelines(request.texts)
-                
-                # Run perplexity calculation
-                ppl_pipe = subprocess.Popen(
-                    [benchllmserver.executable_ppl_path, '-m', benchllmserver.model_id, 
-                    '--chunks', str(request.amount), '-f', temp_file], 
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
-                stdout, stderr = ppl_pipe.communicate(timeout=300)  # 5 min timeout
-                
-                if ppl_pipe.returncode != 0:
-                    raise HTTPException(status_code=500, detail=f"Subprocess error: {stderr}")
-                
-                # Parse results
-                ppl_res = stdout[stdout.find('minutes'):stdout.rfind('estimate')]
-                results = []
-                for num in ppl_res.split(',')[:-1]:
-                    num = num[3:]
-                    results.append(num)
-                
-                return results
+        if benchllmserver.server_type == "llama.cpp":
+            # Write texts to temp file
+            temp_file = "./wikitext.txt"
+            with open(temp_file, "w", encoding='utf-8') as f:
+                f.writelines(request.texts)
             
-            elif benchllmserver.server_type == "gptqmodel":
-                perplexity = evaluate.load("perplexity", module_type="metric")
-                results = perplexity.compute(predictions=request.texts, model_id=benchllmserver.model_id)
-                return results
+            # Run perplexity calculation
+            ppl_llm_process = subprocess.Popen(
+                [benchllmserver.executable_ppl_path, '-m', benchllmserver.model_id, 
+                '--chunks', str(request.amount), '-f', temp_file], 
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
+            stdout, stderr = ppl_llm_process.communicate()
+            
+            # Parse results
+            ppl_res = stdout[stdout.find('minutes'):stdout.rfind('estimate')]
+            results = []
+            for num in ppl_res.split(',')[:-1]:
+                num = num[3:]
+                results.append(num)
+            return results
         
-        except subprocess.TimeoutExpired:
-            raise HTTPException(status_code=504, detail="Perplexity calculation timeout")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        elif benchllmserver.server_type == "gptqmodel":
+            perplexity = evaluate.load("perplexity", module_type="metric")
+            results = perplexity.compute(predictions=request.texts, model_id=benchllmserver.model_id)
+            return results['perplexities']
 
 if __name__ =="__main__":
     import argparse
     import uvicorn
-    parser = argparse.ArgumentParser(description="Execute the model optimization pipeline")
+    parser = argparse.ArgumentParser(description="Execute the model optimization llm_processline")
     
     parser.add_argument("--serv-path",default="./llama.cpp/build/bin/llama-server")
     parser.add_argument("--ppl-path", default="./llama.cpp/build/bin/llama-perplexity")
