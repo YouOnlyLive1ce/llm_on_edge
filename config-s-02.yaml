@@ -1,15 +1,14 @@
 params:
-  huggingface_link: "HuggingFaceTB/SmolLM2-1.7B-Instruct"
-  huggingface_link_pruned: "nothingisenough/smollm2-sparsegpt-02" # shortcut for prune stage, else "false"
-  # huggingface_link_quantized: "nothingisenough/smollm2-sparsegpt-02-gptq-4" # shortcut for quantize stage, else "false"
-  model_name: "smollm2"
+  huggingface_link: "allenai/OLMo-2-0425-1B"
+  huggingface_link_pruned: "nothingisenough/olmo2-sparsegpt-02" # shortcut for prune stage, else "false"
+  model_name: "olmo2"
 
   pruning_method: "sparsegpt" # sparsegpt, wanda
   sparsity_ratio: 0.2
   sparsity_type: "unstructured" # 2:4, 4:8
   model_folder: "./out" # folder with optimized models
-  quantize_method: ["llama.cpp","gptq","awq"]
-  quantize_bpw: 4 # llama.cpp+4=IQ_4XS llama.cpp+8=Q8_0
+  quantize_method: ["gptq","llama.cpp"] #,"awq"]
+  quantize_bpw: 8 # llama.cpp+4=IQ_4XS llama.cpp+8=Q8_0
 
 stages:
   setup:
@@ -101,8 +100,8 @@ stages:
   # benchmark all ggufs and gptqmodels on cpu
   # need to manually run benchmark_server.py in other shell or remote
     cmd: |
-      python3 ./llm_on_edge/benchmark/benchmark_client.py \
-        --models-path ${model_folder}/${model_name}/quantized
+      python3 ./llm_on_edge/benchmark/benchmark_server.py ;
+      python3 ./llm_on_edge/benchmark/benchmark_client.py
     
     deps:
       - ${model_folder}/${model_name}/

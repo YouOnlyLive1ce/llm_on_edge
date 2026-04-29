@@ -65,13 +65,20 @@ if __name__=="__main__":
         
         model_path=args.input_folder
         model_name=next(Path(model_path).rglob("*.gguf")).stem
-        quant_method=METHOD.GPTQ if args.quantize_method=="gptq" else METHOD.AWQ
         tokenizer=AutoTokenizer.from_pretrained(model_path)
-        quant_config = QuantizeConfig(
-            quant_method=quant_method,
-            bits=int(args.quantize_bpw), group_size=32,
-            mse=0.05, failsafe=None,
-        )
+        if args.quantize_method=="gptq":
+            quant_config = QuantizeConfig(
+                quant_method=METHOD.GPTQ,
+                bits=int(args.quantize_bpw), group_size=64,
+                # mse=0.05, failsafe=None, # bad?
+            )
+        elif args.quantize_method=="awq":
+            # it consumes 1GB/sec disk
+            quant_config=QuantizeConfig(
+                quant_method=METHOD.AWQ,
+                bits=int(args.quantize_bpw),
+                offload_to_disk=False,pack_impl="gpu",
+            )
         model=GPTQModel.load(model_path,quantize_config=quant_config, device="cuda:0") # quantize with gpu
-        model.quantize(calibration=calibration_dataset, backend=BACKEND.TORCH)
+        model.quantize(calibration=calibration_dataset, backend=BACKEND.TRITON)
         model.save(f"{args.out_folder}")

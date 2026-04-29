@@ -119,9 +119,9 @@ class PipelineExecutor:
     
     def execute_stage(self, stage_name: str, force: bool = False):
         """Execute a single pipeline stage."""
-        if stage_name in self.executed_stages:
-            logger.info(f"Stage '{stage_name}' already executed, skipping.")
-            return True
+        # if stage_name in self.executed_stages:
+        #     logger.info(f"Stage '{stage_name}' already executed, skipping.")
+        #     return True
         
         stage_config = self.config['stages'][stage_name]
         
@@ -137,9 +137,9 @@ class PipelineExecutor:
                 outs = [out.replace("${item}", value) for out in stage_config.get('outs', [])]
                 
                 # Skip if outputs already exist and not forced
-                if not force and self._check_outputs_exist(outs):
-                    logger.info(f"Skipping {param_name}={value} for stage '{stage_name}' (outputs exist)")
-                    continue
+                # if not force and self._check_outputs_exist(outs):
+                #     logger.info(f"Skipping {param_name}={value} for stage '{stage_name}' (outputs exist)")
+                #     continue
                 
                 logger.info(f"Executing {param_name}={value} for stage '{stage_name}'")
                 if not self._run_command(cmd, stage_name):
@@ -159,10 +159,10 @@ class PipelineExecutor:
         outs = stage_config.get('outs', [])
         
         # Skip if outputs already exist and not forced
-        if not force and self._check_outputs_exist(outs):
-            logger.info(f"Outputs for stage '{stage_name}' already exist, skipping.")
-            self.executed_stages.add(stage_name)
-            return True
+        # if not force and self._check_outputs_exist(outs):
+        #     logger.info(f"Outputs for stage '{stage_name}' already exist, skipping.")
+        #     self.executed_stages.add(stage_name)
+        #     return True
         
         logger.info(f"Executing stage: {stage_name}")
         cmd = stage_config['cmd']

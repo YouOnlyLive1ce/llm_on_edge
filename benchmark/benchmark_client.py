@@ -12,9 +12,10 @@ class BenchLLMClient:
         self.model_id=None
         self.server_type=None
         self.wiki_path=wiki_path
-        self.amount_samples=2
+        self.amount_samples=200
         self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
         self.results={
+                        'answers':[],
                         'accuracy':[],
                         'ppl':[],
                         'flips':[],
@@ -38,7 +39,7 @@ class BenchLLMClient:
         requests.post(f'{self.server_url}/server_setup',headers=headers,json=data)
         self.model_id=None
         self.server_type=None
-        self.results={'accuracy':[],'ppl':[],'flips':[],'prompt_per_second':[],'predicted_per_second':[]}
+        self.results={'accuracy':[],'ppl':[],'flips':[],'prompt_per_second':[],'predicted_per_second':[],'answers':[]}
         
     def bench_accuracy(self):
         headers = {"Content-Type": "application/json"}
@@ -80,6 +81,7 @@ class BenchLLMClient:
             # save stats
             logger.info(response)
             answer = response['chat']['content']
+            self.results['answers'].append(answer)
             self.results['accuracy'].append(any(word in answer.split() for word in row['answer'].split()))
             self.results['prompt_per_second'].append(response['prompt_per_second'])
             self.results['predicted_per_second'].append(response['predicted_per_second'])
@@ -123,17 +125,18 @@ class BenchLLMClient:
             json.dump(self.results,json_file,indent=2)
     
     def compare_results(self, path_to_jsons, base_model_file_name):
-        import os
         import pandas as pd
         import numpy as np
         import scipy.stats
-
-        json_files = [pos_json for pos_json in os.listdir(path_to_jsons) if pos_json.endswith('.json')]
-        logger.info(f"json_files: {json_files}")
+        from pathlib import Path
+        
+        json_files = [str(path) for path in Path(path_to_jsons).rglob("*.json")]
+        logger.info(f"{len(json_files)} json_files: {json_files}")
         dfs = []
         for file in json_files:
-            df = pd.read_json(path_to_jsons + "/" + file, orient='index')
+            df = pd.read_json(file, orient='index')
             df = df.transpose()
+            df=df.drop(columns=["answers"])
             if df['ppl'].dtype==object: #todo remove if
                 corrected = df['ppl'].str.extract(r'\](\d+\.?\d*)')
                 corrected = corrected[0]  # Extract from DataFrame to Series
@@ -144,7 +147,7 @@ class BenchLLMClient:
             df['accuracy'] = pd.to_numeric(df['accuracy'])
             df['ppl'] = pd.to_numeric(df['ppl'])
             dfs.append(df)
-            logger.info(df['accuracy'].notna().sum(),df['ppl'].notna().sum())
+            # print(df['accuracy'].notna().sum(),df['ppl'].notna().sum())
 
         # Find index of the base model
         base_model_idx = None
@@ -160,64 +163,77 @@ class BenchLLMClient:
             if i == base_model_idx:
                 # Base model has no flips relative to itself
                 dfs[i]['flips'] = False
+                dfs[i]['inversed_flips']=False
             else:
                 dfs[i]['flips'] = (dfs[i]['accuracy'] == 0.0) & (dfs[base_model_idx]['accuracy'] == 1.0)
+                dfs[i]['inversed_flips']=(dfs[i]['accuracy'] == 1.0) & (dfs[base_model_idx]['accuracy'] == 0.0)
 
         pd.set_option('display.float_format', '{:0.20f}'.format)
         result_df = []
 
         for i in range(len(json_files)):
+            if i==base_model_idx:
+                print("!")
             df = dfs[i]
 
             # filter rows which fail to generate tokens
-            fail_mask = df['token/sec'] == 1000000.0
-            fail_count = fail_mask.sum()
-            df_good = df[~fail_mask]
+            # fail_mask = df['predicted_per_second'] == 1000000.0
+            # fail_count = fail_mask.sum()
+            # df_good = df[~fail_mask]
 
             def mean_std(series):
                 if series is None or len(series) == 0:
                     return "NaN"
                 return f"{series.mean():.2f}+-{series.std():.2f}"
 
-            # do not count 0 generated tokens with 1000000 tok/sec
             ppl_str = mean_std(df['ppl'])
-            prefill_str = mean_std(df_good['prompt_per_second'])
-            decode_str = mean_std(df_good['predicted_per_second'])
+            prefill_str = mean_std(df['prompt_per_second'])
+            decode_str = mean_std(df['predicted_per_second'])
             # do count 0 generated tokens as fail
-            accuracy_mean = df['accuracy'].sum()/df['accuracy'].notna().sum()
-            flips_mean = df['flips'].sum()/df['accuracy'].notna().sum()
+            accuracy_mean = df['accuracy'].mean()
+            flips_mean = df['flips'].sum()/df['accuracy'].sum()
+            inversed_flips_mean=df['inversed_flips'].sum()/df['accuracy'].sum()
 
             # McNemar's test p-value relative to base model
             if i == base_model_idx:
                 p_value = np.nan
+                ci_lower, ci_upper = np.nan, np.nan
             else:
-                base_acc = dfs[base_model_idx][~fail_mask]['accuracy']
+                base_acc = dfs[base_model_idx]['accuracy']
                 curr_acc = df['accuracy']
                 # Contingency table:
                 # a: both correct
                 # b: base correct, current incorrect (flips)
                 # c: base incorrect, current correct
                 # d: both incorrect
-                b = ((base_acc == 1) & (curr_acc == 0)).sum()
-                c = ((base_acc == 0) & (curr_acc == 1)).sum()
-                logger.info("correct->incorrect",b)
-                logger.info("incorrect->correct",c)
+                b = ((base_acc == 1.0) & (curr_acc == 0.0)).sum()
+                c = ((base_acc == 0.0) & (curr_acc == 1.0)).sum()
                 if b + c == 0:
                     p_value = np.nan
+                    ci_lower, ci_upper = np.nan, np.nan
                 else:
-                    chi2 = (b - c) ** 2 / (b + c)
-                    p_value = 1 - scipy.stats.chi2.cdf(chi2, 1)
+                    # McNemar's test
+                    chi2_stat = (b - c) ** 2 / (b + c)
+                    p_value = 1 - scipy.stats.chi2.cdf(chi2_stat, 1)
+                    
+                    # 95% confidence interval for difference in proportions
+                    n = base_acc.size
+                    diff = (b - c) / n
+                    se = np.sqrt((b + c)) / n
+                    ci_lower, ci_upper = diff - 1.96 * se, diff + 1.96 * se
 
             result_df.append({
-                "method": json_files[i],
+                "method": Path(json_files[i]).name,
                 "accuracy": f"{accuracy_mean:.2f}",
                 "ppl": ppl_str,
                 "prefill": prefill_str,
                 "decode": decode_str,
                 # "memory": memory_str,
-                "flips": f"{flips_mean:.2f}",
-                "fail": f"{fail_count/df['accuracy'].size:.2f}",
-                "p_value": f"{p_value:.2f},n={df['accuracy'].notna().sum()}"
+                "cor->incor": f"{flips_mean:.2f}",
+                "incor->cor": f"{inversed_flips_mean:.2f}",
+                # "fail": f"{fail_count/df['accuracy'].size:.2f}",
+                "p_value (mcNemar)": f"{p_value:.2f},n={df['accuracy'].notna().sum()}",
+                "CI (95%)" : f"{ci_lower:.2f},{ci_upper:.2f}"
             })
 
         result_df = pd.DataFrame(result_df)
@@ -241,9 +257,8 @@ class BenchLLMClient:
                 return np.nan
         
         # Extract numeric values from string columns
-        for col in ['decode', 'ppl', 'token/sec', 'prefill', 'memory']:
-            if col in tmp_df.columns:
-                tmp_df[col] = tmp_df[col].apply(extract_mean)
+        for col in result_df.columns:
+            tmp_df[col] = tmp_df[col].apply(extract_mean)
         
         # Drop non-numeric columns
         cols_to_drop = ['method'] if 'method' in tmp_df.columns else []
@@ -265,23 +280,24 @@ if __name__ =="__main__":
     from pathlib import Path
     
     parser = argparse.ArgumentParser(description="Execute the model optimization pipeline")
-    parser.add_argument("--models-path", default="./out/smollm2", help="where ggufs and gptqmodels are")
-    parser.add_argument("--results-path", default="./out/benchmark_results2", help="where results are")
+    parser.add_argument("--models-path", default="./out/olmo2", help="where ggufs and gptqmodels are")
+    parser.add_argument("--results-path", default="./out/olmo2/benchmark_results", help="where results are")
     parser.add_argument("--server-url",default="http://localhost:8080")
     args = parser.parse_args()
     
     folder_path = Path(args.models_path)
     # run all ggufs (original_q16, pruned_q16, pruned_qX) and /quantized/model_{gptq|awq}X.safetensors
-    models = [str(path) for path in folder_path.rglob("*.gguf")] + [str(path.parent) for path in folder_path.rglob("*.safetensors")]
+    
+    models = [str(path) for path in folder_path.rglob("*.gguf")] # [str(path.parent) for path in folder_path.rglob("quantize_config.json")] + [str(path) for path in folder_path.rglob("*.gguf")]
     logger.info(f"models found: {models}")
     # models also can be hf link for remote server
     
     client=BenchLLMClient(args.server_url)
-    for model in models[2:]:
+    for model in models:
         client.start_server(model)
-        time.sleep(300) # waiting is performed ob server side
+        time.sleep(400) # waiting is performed ob server side
         client.bench_accuracy()
-        client.bench_perplexity()
+        # client.bench_perplexity()
         client.save_to_file(f'./{args.results_path}/{client.model_id}')
         client.stop_server()
-        time.sleep(100)
+        time.sleep(120)

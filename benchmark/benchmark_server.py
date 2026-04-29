@@ -43,7 +43,7 @@ class BenchLLMServer:
         self.llm_port=llm_port # only for internal requests
         self.llm_openai_client=None
         self.llm_pipe=None # automatic server setup
-        self.gptqmodel=None # need for measuring speed
+        self.gptqmodel=None # need for measuring gptqmodel_speed
         
         self.results={
                         'accuracy':[],
@@ -59,19 +59,19 @@ class BenchLLMServer:
         if request.get("server_type")=="llama.cpp":
             # llamacpp gguf bench
             self.server_type="llama.cpp"
-            self.llm_pipe=subprocess.Popen([self.executable_server_path, '-m', self.model_id, '--port',self.llm_port], stdout=subprocess.PIPE)
+            self.llm_pipe=subprocess.Popen([self.executable_server_path, '-m', self.model_id, '--port',self.llm_port, '--no-cache-prompt','-cram', '0', '--parallel','1'], stdout=subprocess.PIPE)
 
         elif request.get("server_type")=="gptqmodel":
             # gptqmodel safetensors bench
             self.server_type="gptqmodel"
             from gptqmodel import GPTQModel, BACKEND
-            self.gptqmodel=GPTQModel.load(self.model_id,device="cpu")#,device="cuda:0", backend=BACKEND.TRITON)
+            self.gptqmodel=GPTQModel.load(self.model_id,device="cuda:0",backend=BACKEND.TRITON)
             # need to run separate process because current is blocked by fastapi uvicorn loop
             self.llm_pipe = subprocess.Popen(
                 [
                     "python", "-c",
                     "from gptqmodel import GPTQModel, BACKEND; "
-                    f"model = GPTQModel.load('{self.model_id}', device='cuda:0',backend=BACKEND.TRITON); "
+                    f"model = GPTQModel.load('{self.model_id}', device='cuda:0', backend=BACKEND.TRITON); "
                     f"model.serve(host='0.0.0.0', port={self.llm_port}, async_mode=True)"
                 ],
                 stdout=subprocess.PIPE,
@@ -79,6 +79,7 @@ class BenchLLMServer:
             )
     
     def stop_llm_server(self):
+        gc.collect()
         if self.server_type=="llama.cpp":
             self.model_id=None
             self.llm_openai_client=None
@@ -94,10 +95,6 @@ class BenchLLMServer:
             self.model_id=None
             self.server_type=None
             self.gptqmodel=None
-        gc.collect()
-        import torch
-        torch.cuda.empty_cache()
-        gc.collect()
     
     def setup_openai_client(self):
         self.llm_openai_client=OpenAI(base_url=f"http://localhost:{self.llm_port}/v1",api_key="")
@@ -119,22 +116,25 @@ class BenchLLMServer:
         response = benchllmserver.llm_openai_client.chat.completions.create(
             model=benchllmserver.model_id,
             messages=request.messages,
-            temperature=request.temperature,
+            # temperature=request.temperature,
             max_tokens=request.max_tokens
         )
         clean_response={}
-        clean_response['chat']={'content':response.choices[0].message.content if response.choices[0].message else "",
-                                'role':response.choices[0].message.role if response.choices[0].message else ""}
+        print(response)
         if benchllmserver.server_type=="llama.cpp":
+            clean_response['chat']={'content':response.choices[0].message.content if response.choices[0].message else "",
+                                'role':response.choices[0].message.role if response.choices[0].message else ""}
             clean_response['prompt_per_second']=response.timings['prompt_per_second']
             clean_response['predicted_per_second']=response.timings['predicted_per_second']
         # manually bench speed for gptqmodel
         elif benchllmserver.server_type=="gptqmodel":
+            clean_response['chat']={'content':response.choices[0].text if response.choices[0].text else "",
+                                'role':""}
             message=f"{request.messages[-2].content} {request.messages[-1].content}"
             response_speed=gptqmodel_speed(benchllmserver.gptqmodel,message)
             clean_response['prompt_per_second']=response_speed.prompt_per_second[0]
             clean_response['predicted_per_second']=response_speed.predicted_per_second[0]
-        print(clean_response)
+        # print(clean_response)
         return clean_response
     
     @app.post("/bench_perplexity")
@@ -166,7 +166,8 @@ class BenchLLMServer:
         elif benchllmserver.server_type == "gptqmodel":
             perplexity = evaluate.load("perplexity", module_type="metric")
             results = perplexity.compute(predictions=request.texts, model_id=benchllmserver.model_id)
-            return results['perplexities']
+            results=[str(ppl) for ppl in results['perplexities']]
+            return results
 
 if __name__ =="__main__":
     import argparse
