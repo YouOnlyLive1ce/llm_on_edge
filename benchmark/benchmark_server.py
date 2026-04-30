@@ -65,13 +65,13 @@ class BenchLLMServer:
             # gptqmodel safetensors bench
             self.server_type="gptqmodel"
             from gptqmodel import GPTQModel, BACKEND
-            self.gptqmodel=GPTQModel.load(self.model_id,device="cuda:0",backend=BACKEND.TRITON)
+            self.gptqmodel=GPTQModel.load(self.model_id,device="cpu")
             # need to run separate process because current is blocked by fastapi uvicorn loop
             self.llm_pipe = subprocess.Popen(
                 [
                     "python", "-c",
                     "from gptqmodel import GPTQModel, BACKEND; "
-                    f"model = GPTQModel.load('{self.model_id}', device='cuda:0', backend=BACKEND.TRITON); "
+                    f"model = GPTQModel.load('{self.model_id}', device='cpu')"
                     f"model.serve(host='0.0.0.0', port={self.llm_port}, async_mode=True)"
                 ],
                 stdout=subprocess.PIPE,

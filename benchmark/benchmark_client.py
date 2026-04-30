@@ -158,28 +158,9 @@ class BenchLLMClient:
         if base_model_idx is None:
             raise ValueError(f"Base model file '{base_model_file_name}' not found in json_files")
 
-        # Flip flags: compare each model to the base model
-        for i in range(len(dfs)):
-            if i == base_model_idx:
-                # Base model has no flips relative to itself
-                dfs[i]['flips'] = False
-                dfs[i]['inversed_flips']=False
-            else:
-                dfs[i]['flips'] = (dfs[i]['accuracy'] == 0.0) & (dfs[base_model_idx]['accuracy'] == 1.0)
-                dfs[i]['inversed_flips']=(dfs[i]['accuracy'] == 1.0) & (dfs[base_model_idx]['accuracy'] == 0.0)
-
-        pd.set_option('display.float_format', '{:0.20f}'.format)
-        result_df = []
-
+        result_df=[]
         for i in range(len(json_files)):
-            if i==base_model_idx:
-                print("!")
             df = dfs[i]
-
-            # filter rows which fail to generate tokens
-            # fail_mask = df['predicted_per_second'] == 1000000.0
-            # fail_count = fail_mask.sum()
-            # df_good = df[~fail_mask]
 
             def mean_std(series):
                 if series is None or len(series) == 0:
@@ -189,25 +170,23 @@ class BenchLLMClient:
             ppl_str = mean_std(df['ppl'])
             prefill_str = mean_std(df['prompt_per_second'])
             decode_str = mean_std(df['predicted_per_second'])
-            # do count 0 generated tokens as fail
+            
             accuracy_mean = df['accuracy'].mean()
-            flips_mean = df['flips'].sum()/df['accuracy'].sum()
-            inversed_flips_mean=df['inversed_flips'].sum()/df['accuracy'].sum()
+            base_acc = dfs[base_model_idx]['accuracy']
+            curr_acc = df['accuracy']
 
-            # McNemar's test p-value relative to base model
             if i == base_model_idx:
                 p_value = np.nan
                 ci_lower, ci_upper = np.nan, np.nan
+                a=(base_acc==1.0).sum()
+                b=0.0
+                c=0.0
+                d=(base_acc==0.0).sum()
             else:
-                base_acc = dfs[base_model_idx]['accuracy']
-                curr_acc = df['accuracy']
-                # Contingency table:
-                # a: both correct
-                # b: base correct, current incorrect (flips)
-                # c: base incorrect, current correct
-                # d: both incorrect
+                a = ((base_acc == 1.0) & (curr_acc == 1.0)).sum()
                 b = ((base_acc == 1.0) & (curr_acc == 0.0)).sum()
                 c = ((base_acc == 0.0) & (curr_acc == 1.0)).sum()
+                d = ((base_acc == 0.0) & (curr_acc == 0.0)).sum()
                 if b + c == 0:
                     p_value = np.nan
                     ci_lower, ci_upper = np.nan, np.nan
@@ -229,10 +208,12 @@ class BenchLLMClient:
                 "prefill": prefill_str,
                 "decode": decode_str,
                 # "memory": memory_str,
-                "cor->incor": f"{flips_mean:.2f}",
-                "incor->cor": f"{inversed_flips_mean:.2f}",
+                "correct->correct": f"{a/curr_acc.size:.2f}",
+                "correct->incorrect": f"{b/curr_acc.size:.2f}",
+                "incorrect->correct": f"{c/curr_acc.size:.2f}",
+                "incorrect->incorrect":f"{d/curr_acc.size:.2f}",
                 # "fail": f"{fail_count/df['accuracy'].size:.2f}",
-                "p_value (mcNemar)": f"{p_value:.2f},n={df['accuracy'].notna().sum()}",
+                "mcNemar p value for accuracy": f"{p_value:.2f},n={df['accuracy'].notna().sum()}",
                 "CI (95%)" : f"{ci_lower:.2f},{ci_upper:.2f}"
             })
 
