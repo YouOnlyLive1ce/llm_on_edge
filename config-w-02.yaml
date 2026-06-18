@@ -1,5 +1,5 @@
 params:
-  huggingface_link: "allenai/OLMo-2-0425-1B"
+  huggingface_link: "allenai/OLMo-2-0425-1B-Instruct"
   huggingface_link_pruned: "nothingisenough/olmo2-wanda-02" # shortcut for prune stage, else "false"
   model_name: "olmo2"
 
@@ -7,7 +7,7 @@ params:
   sparsity_ratio: 0.2
   sparsity_type: "unstructured" # 2:4, 4:8
   model_folder: "./out" # folder with optimized models
-  quantize_method: ["gptq", "llama.cpp"] #,"awq"]
+  quantize_method: ["gptq","llama.cpp"] #,"awq"]
   quantize_bpw: 8 # llama.cpp+4=IQ_4XS llama.cpp+8=Q8_0
 
 stages:

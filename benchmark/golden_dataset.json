@@ -1,0 +1,802 @@
+[
+  {
+    "user_question": "Question context: Adam Collis Ed Wood (film) Tyler Bates Doctor Strange (2016 film) Hellraiser: Inferno Sinister (film) Deliver Us from Evil (2014 film) Woodson, Arkansas Conrad Brooks The Exorcism of Emily Rose.                                 Answer my question: Were Scott Derrickson and Ed Wood of the same nationality?. Correct answer:",
+    "golden_answer": "yes"
+  },
+  {
+    "user_question": "Question context: A Kiss for Corliss Lord High Treasurer Meet Corliss Archer (TV series) Village accountant Joseph Kalite Charles Craft Meet Corliss Archer Janet Waldo Kiss and Tell (1945 film) Secretary of State for Constitutional Affairs.                                 Answer my question: What government position was held by the woman who portrayed Corliss Archer in the film Kiss and Tell?. Correct answer:",
+    "golden_answer": "Chief of Protocol"
+  },
+  {
+    "user_question": "Question context: Animorphs Science Fantasy (magazine) The Divide trilogy Kazon Victoria Hanley Shadowshaper Andre Norton Award Etiquette &amp; Espionage List of Square Enix companion books Left Behind: The Kids.                                 Answer my question: What science fantasy young adult series, told in first person, has a set of companion books narrating the stories of enslaved worlds and alien species?. Correct answer:",
+    "golden_answer": "Animorphs"
+  },
+  {
+    "user_question": "Question context: Esma Sultan Esma Sultan (daughter of Abdul Hamid I) Laleli Mosque Gevheri Kad\u0131n Esma Sultan (daughter of Ahmed III) Djama\u00e2 el Kebir Sultan Ahmed Mosque Esma Sultan (daughter of Abd\u00fclaziz) K\u00fc\u00e7\u00fck H\u00fcseyin Pasha Esma Sultan Mansion.                                 Answer my question: Are the Laleli Mosque and Esma Sultan Mansion located in the same neighborhood?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: Great Eastern Conventions Big Stone Gap (film) I Love NY (2015 film) Just Another Romantic Wrestling Comedy Hamish and Andy's Gap Year Sex and the City (film) Nola (film) Kingston Morning Clinton, Minnesota New York Society of Model Engineers.                                 Answer my question: The director of the romantic comedy \"Big Stone Gap\" is based in what New York city?. Correct answer:",
+    "golden_answer": "Greenwich Village, New York City"
+  },
+  {
+    "user_question": "Question context: SF9 (band) Baro (singer) List of awards and nominations received by Shinee History (band) Seventeen discography Warrior (B.A.P song) Cho Kyuhyun BTS discography Madtown List of songs written by Ravi.                                 Answer my question: 2014 S/S is the debut album of a South Korean boy group that was formed by who?. Correct answer:",
+    "golden_answer": "YG Entertainment"
+  },
+  {
+    "user_question": "Question context: Lil Ru James P. Comer Tragedy Khadafi Amaruk Kayshapanta Method Man Eenasul Fateh Criss Angel Indriati Iskak ELDee Mick (DJ).                                 Answer my question: Who was known by his stage name Aladin and helped organizations improve their performance as a consultant?. Correct answer:",
+    "golden_answer": "Eenasul Fateh"
+  },
+  {
+    "user_question": "Question context: Dwyer Arena Lewiston Maineiacs Loan modification in the United States 2007 Memorial Cup Cedar Rapids Ice Arena 2011\u201312 QMJHL season Robins Center 2006\u201307 QMJHL season Case Gym Billings Bulls.                                 Answer my question: The arena where the Lewiston Maineiacs played their home games can seat how many people?. Correct answer:",
+    "golden_answer": "3,677 seated"
+  },
+  {
+    "user_question": "Question context: Gumbo (PJ Morton album) Lady Gaga x Terry Richardson Piano Girl Snoecks James Joseph Richardson Kenton Richardson Amanda Lepore Index Magazine Madonna (book) Annie Morton.                                 Answer my question: Who is older, Annie Morton or Terry Richardson?. Correct answer:",
+    "golden_answer": "Terry Richardson"
+  },
+  {
+    "user_question": "Question context: E.R. Hays House Cresco Opera House Ophur Mendocino County GMO Ban Wilford H. Fawcett House Suffrajett Hallelujah! I'm a Bum (album) William H. Cook Water Tank House United States Senate election in Illinois, 1978 Amherst, Massachusetts.                                 Answer my question: Are Local H and For Against both from the United States?. Correct answer:",
+    "golden_answer": "yes"
+  },
+  {
+    "user_question": "Question context: History of the Kansas City metropolitan area University of the Incarnate Word Federal University of Para\u00edba Kansas City metropolitan area University of Missouri\u2013Kansas City Downtown Kansas City University of Kansas Kansas City jazz North Kansas City, Missouri Kansas City Scout.                                 Answer my question: What is the name of the fight song of the university whose main campus is in Lawrence, Kansas and whose branch campuses are in the Kansas City metropolitan area?. Correct answer:",
+    "golden_answer": "Kansas Song"
+  },
+  {
+    "user_question": "Question context: Gone in 60 Seconds (2000 film) Deadfall (1993 film) Time to Kill (1989 film) The Family Man Drive Angry Season of the Witch (2011 film) Bangkok Dangerous (2008 film) City of Angels (film) It Could Happen to You (1994 film) Ungod.                                 Answer my question: What screenwriter with credits for \"Evolution\" co-wrote a film starring Nicolas Cage and T\u00e9a Leoni?. Correct answer:",
+    "golden_answer": "David Weissman"
+  },
+  {
+    "user_question": "Question context: Guns N' Roses discography Get Christie Love! End of Days (film) Steven Adler Faction Punk Hammerjack's The Recycler Last Action Hero True Lies Arnold Schwarzenegger filmography.                                 Answer my question: What year did Guns N Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective?. Correct answer:",
+    "golden_answer": "1999"
+  },
+  {
+    "user_question": "Question context: Pershing Square Capital Management Loan modification in the United States 888 7th Avenue Villard (imprint) Random House Tower Carl B. Stokes United States Courthouse South Phoenix Real estate benchmarking Hounsfield Heights/Briar Hill, Calgary Real estate technology.                                 Answer my question: Are Random House Tower and 888 7th Avenue both used for real estate?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: Sir Matt Busby Sports Complex 1995\u201396 Manchester United F.C. season Alex Ferguson David Beckham Academy David Beckham's Soccer USA 1996 FA Charity Shield Joshua Parlby Ernest Mangnall The Class of '92 Matt Busby.                                 Answer my question: The football manager who recruited David Beckham managed Manchester United during what timeframe?. Correct answer:",
+    "golden_answer": "from 1986 to 2013"
+  },
+  {
+    "user_question": "Question context: Fishing Lake Neosho State Fishing Lake Higgins Lake Shawnee State Fishing Lake Brown State Fishing Lake Osage State Fishing Lake Higgins Lake, Michigan Wilson Lake (Iron County, Wisconsin) Narrow Hills Provincial Park Commanda Lake.                                 Answer my question: Brown State Fishing Lake is in a country that has a population of how many inhabitants ?. Correct answer:",
+    "golden_answer": "9,984"
+  },
+  {
+    "user_question": "Question context: Vermont Catamounts men's soccer 2014\u201315 Vermont Catamounts men's basketball team 2015\u201316 Vermont Catamounts men's basketball team 2012\u201313 Vermont Catamounts men's basketball team Vermont Catamounts men's basketball 2010\u201311 Vermont Catamounts men's basketball team 2013\u201314 Vermont Catamounts men's basketball team Vermont Catamounts men's ice hockey 2011\u201312 Vermont Catamounts men's basketball team 2016\u201317 Vermont Catamounts men's basketball team.                                 Answer my question: The Vermont Catamounts men's soccer team currently competes in a conference that was formerly known as what from 1988 to 1996?. Correct answer:",
+    "golden_answer": "the North Atlantic Conference"
+  },
+  {
+    "user_question": "Question context: Mignon Teatro Giuseppe Verdi Parma Airport Verdi, the King of Melody Armand Castelmary Giuseppe Verdi (film) Giuseppe Verdi Monument Ferdinando Provesi Bernhard B\u00f6tel List of major opera composers.                                 Answer my question: Are Giuseppe Verdi and Ambroise Thomas both Opera composers ?. Correct answer:",
+    "golden_answer": "yes"
+  },
+  {
+    "user_question": "Question context: Douglas J. Bennet Robert R. Hood United States Assistant Secretary of State Robert Hormats Roger O. Egeberg Edward D. Martin Steven K. Galson George P. Taylor Bradford P. Campbell Office of Population Affairs.                                 Answer my question: Roger O. Egeberg was Assistant Secretary for Health and Scientific Affairs during the administration of a president that served during what years?. Correct answer:",
+    "golden_answer": "1969 until 1974"
+  },
+  {
+    "user_question": "Question context: Gretchen Osgood Warren R509 road (Ireland) Erskine Barton Childers Robert Caesar Childers Robert Erskine Childers Asgard (yacht) Robert Barton The Riddle of the Sands (film) Irish Bulletin Molly Childers.                                 Answer my question: Which writer was from England, Henry Roth or Robert Erskine Childers?. Correct answer:",
+    "golden_answer": "Robert Erskine Childers DSC"
+  },
+  {
+    "user_question": "Question context: Catharina Felser Tony Ave Force India VJM04 Michael James Lewis Andrea Bacci 2009 Singapore Grand Prix 2014 Bahrain Grand Prix Force India VJM05 Eduardo Troconis Mike Shank.                                 Answer my question: Which other Mexican Formula One race car driver has held the podium besides the Force India driver born in 1990?. Correct answer:",
+    "golden_answer": "Pedro Rodr\u00edguez"
+  },
+  {
+    "user_question": "Question context: Little Black Rain Cloud Hip Hip Pooh-Ray! Heffalumps and Woozles Winnie the Pooh and the Blustery Day Brianne Siddall Kate Higgins The Rain Rain Rain Came Down Down Down A Rather Blustery Day The House That Jack Built (1967 film) The Wonderful Thing About Tiggers.                                 Answer my question: This singer of A Rather Blustery Day also voiced what hedgehog?. Correct answer:",
+    "golden_answer": "Sonic"
+  },
+  {
+    "user_question": "Question context: Siri Remote Apple Remote NetSupport Manager Remote control Front Row (software) Universal remote MacScan Apple Remote Desktop Apple Watch Trainmaster Command Control.                                 Answer my question: Aside from the Apple Remote, what other device can control the program Apple Remote was originally designed to interact with?. Correct answer:",
+    "golden_answer": "keyboard function keys"
+  },
+  {
+    "user_question": "Question context: Badly Drawn Boy discography Soulfire (Tom Hingley album) Something to Talk About (Badly Drawn Boy song) Under an Hour Craig Davies (musician) Silent Sigh About a Boy (soundtrack) The Hour of Bewilderbeast About a Boy (film) Tom Rothrock.                                 Answer my question: Which performance act has a higher instrument to person ratio, Badly Drawn Boy or Wolf Alice? . Correct answer:",
+    "golden_answer": "Badly Drawn Boy"
+  },
+  {
+    "user_question": "Question context: Sommeren '92 Pel\u00e9 IFFHS World's Best Club Coach IFFHS World's Best Goalkeeper Isaak Hassler Go\u0161tautai Kasper Hvidt Kasper Schmeichel Gus Williams (musician) Peter Schmeichel.                                 Answer my question: What was the father of Kasper Schmeichel voted to be by the IFFHS in 1992?. Correct answer:",
+    "golden_answer": "World's Best Goalkeeper"
+  },
+  {
+    "user_question": "Question context: Puss N' Boots/These Boots Are Made for Walkin' These Boots Are Made for Walkin' Boots (EP) Kon Kan Murong Yong Nancy Sinatra Boots (album) Jim Shoulders Death of Abdul Wali The Twenty-fifth Anniversary Anthology.                                 Answer my question: Who was the writer of These Boots Are Made for Walkin' and who died in 2007?. Correct answer:",
+    "golden_answer": "Barton Lee Hazlewood"
+  },
+  {
+    "user_question": "Question context: 2010\u201311 VCU Rams men's basketball team 2004\u201305 VCU Rams men's basketball team 2014\u201315 VCU Rams men's basketball team 2009\u201310 VCU Rams men's basketball team 1995\u201396 VCU Rams men's basketball team 2013\u201314 VCU Rams men's basketball team 2015\u201316 VCU Rams men's basketball team 2011\u201312 VCU Rams men's basketball team 2016\u201317 VCU Rams men's basketball team 2012\u201313 VCU Rams men's basketball team.                                 Answer my question: The 2011\u201312 VCU Rams men's basketball team, led by third year head coach Shaka Smart, represented Virginia Commonwealth University which was founded in what year?. Correct answer:",
+    "golden_answer": "1838"
+  },
+  {
+    "user_question": "Question context: Huernia.                                 Answer my question: Are both Dictyosperma, and Huernia described as a genus?. Correct answer:",
+    "golden_answer": "yes"
+  },
+  {
+    "user_question": "Question context: New York Shipbuilding Corporation Kaiser Shipyards Eagle Mountain Railroad Nutri Ventures \u2013 The Quest for the 7 Kingdoms Edgar Kaiser Sr. Kaiser Ventures John Roach &amp; Sons Neafie &amp; Levy Edgar Kaiser Jr. Henry J. Kaiser.                                 Answer my question: Kaiser Ventures corporation was founded by an American industrialist who became known as the father of modern American shipbuilding?. Correct answer:",
+    "golden_answer": "Henry J. Kaiser"
+  },
+  {
+    "user_question": "Question context: Tunnels &amp; Trolls Mercenaries, Spies and Private Eyes Crank Caverns Jon St. Andre St. Andre (Goa Assembly constituency) Tunnels &amp; Trolls: Crusaders of Khazan Jim St. Andre Starfaring St. Andre's Parish Ken St. Andre.                                 Answer my question: What is the name for the adventure in \"Tunnels and Trolls\", a game designed by Ken St. Andre?. Correct answer:",
+    "golden_answer": "Arena of Khazan"
+  },
+  {
+    "user_question": "Question context: Greatest Hits (Dan Fogelberg album) Make Love Not War (album) Make Love I Just Want to Make Love to You Mind If We Make Love to You Chuck Berry on Stage All I Wanna Do Is Make Love to You Be the One (Poison song) The Longer We Make Love Shut Up, Make Love.                                 Answer my question: When was Poison's album \"Shut Up, Make Love\" released?. Correct answer:",
+    "golden_answer": "2000"
+  },
+  {
+    "user_question": "Question context: Skyscraper National Park Atsushi Sakurai Dr. Frank J. Hayden Secondary School The Closer I Get Mild and Hazy Kyo (musician) Dewey Beard Masami Tsuchiya Hailstorm Alley Alberta Hail Project.                                 Answer my question: Hayden is a singer-songwriter from Canada, but where does Buck-Tick hail from?. Correct answer:",
+    "golden_answer": "Fujioka, Gunma"
+  },
+  {
+    "user_question": "Question context: Levasseur PL.8 W. E. Johns Fran\u00e7ois Coli Wooster and Davis Gervais Raoul Lufbery L'Oiseau Blanc Charles Nungesser Paul Sauvage (aviator) Georges Madon L'Oiseau bleu (Metzinger).                                 Answer my question: Which  French ace pilot and adventurer fly L'Oiseau Blanc. Correct answer:",
+    "golden_answer": "Charles Eug\u00e8ne"
+  },
+  {
+    "user_question": "Question context: Shayne Workman Hackers (film) Robin Goldstein Psycho Realm Jay Leiderman In the Realm of the Hackers Freakonomics Radio Peter W. Smith Heidi Ewing Freakonomics (film).                                 Answer my question: Are Freakonomics and In the Realm of the Hackers both American documentaries?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: Screaming Trees discography Truly Screaming Trees Change Has Come Beat Happening/Screaming Trees Jamboree (Beat Happening album) Mad Season (band) Mark Pickerel Van Conner Gary Lee Conner.                                 Answer my question: Which band, Letters to Cleo or Screaming Trees, had more members?. Correct answer:",
+    "golden_answer": "Letters to Cleo"
+  },
+  {
+    "user_question": "Question context: Alexander Kerensky Timofey Samsonov Lavr Kornilov Left-wing uprisings against the Bolsheviks Socialist Revolutionary Party Kerensky\u2013Krasnov uprising Louise Bryant Communism in Russia Russian Civil War Battle of Romanovka.                                 Answer my question: Alexander Kerensky was defeated and destroyed by the Bolsheviks in the course of a civil war that ended when ?. Correct answer:",
+    "golden_answer": "October 1922"
+  },
+  {
+    "user_question": "Question context: Chiara Nappi Seven Brief Lessons on Physics Aldo Pontremoli Antonino Lo Surdo Guido Caldarelli Microp\u00e6dia Claudio Pellegrini Enrico Fermi Sergio Ferrara Luciano Pietronero.                                 Answer my question: Seven Brief Lessons on Physics was written by an Italian physicist that has worked in France since what year?. Correct answer:",
+    "golden_answer": "2000"
+  },
+  {
+    "user_question": "Question context: Tower Hill Memorial Rainham War Memorial Freetown Memorial Monmouth War Memorial Arras Flying Services Memorial Livesey Hall War Memorial Portsmouth Naval Memorial Masni\u00e8res Newfoundland Memorial Vietnam War Memorial, Hanoi Alamein Memorial.                                 Answer my question: The Livesey Hal War Memorial commemorates the fallen of which war, that had over 60 million casualties?. Correct answer:",
+    "golden_answer": "World War II"
+  },
+  {
+    "user_question": "Question context: Gerald R. Ford Presidential Library Grantley Adams International Airport Pre-Commissioning Unit Gerald R. Ford International Airport Gerald R. Ford Freeway Bishop International Airport Raleigh Executive Jetport John Glenn Columbus International Airport Elko Regional Airport Pensacola International Airport.                                 Answer my question: Are both Elko Regional Airport and Gerald R. Ford International Airport located in Michigan?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: Princeton Neuroscience Institute Abraham Maslow Frank L. Schmidt Stephen M. Colarelli Stanley Coren Kimberly Young Ralph Hefferline Mathematically Alive E. Mavis Hetherington David C. Funder.                                 Answer my question: Ralph Hefferline was a psychology professor at a university that is located in what city?. Correct answer:",
+    "golden_answer": "New York City"
+  },
+  {
+    "user_question": "Question context: Scotch Collie Collie Viol Toy Manchester Terrier Irish Red and White Setter English Setter Russkiy Toy Teddy Roosevelt Terrier Feist (dog) Florence Nagle.                                 Answer my question: Which dog's ancestors include Gordon and Irish Setters: the Manchester Terrier or the Scotch Collie?. Correct answer:",
+    "golden_answer": "Scotch Collie"
+  },
+  {
+    "user_question": "Question context: Divya S. Menon William Connolley Kanave Kalayathe Muthuchippi Poloru Sachin Warrier Alec Muffett Wes McKinney Sachin Bansal Lead programmer Kazushige Goto.                                 Answer my question: Where is the company that Sachin Warrier worked for as a software engineer headquartered? . Correct answer:",
+    "golden_answer": "Mumbai"
+  },
+  {
+    "user_question": "Question context: Silver Spoon (manga) Manga Bible (series) Murder of Serena McKay I&quot;s Clear Skies! Haven't You Heard? I'm Sakamoto My Bride is a Mermaid The Kindaichi Case Files The Prince of Tennis Neuro: Supernatural Detective.                                 Answer my question: A Japanese manga series based on a 16 year old high school student Ichitaka Seto, is written and illustrated by someone born in what year?. Correct answer:",
+    "golden_answer": "1962"
+  },
+  {
+    "user_question": "Question context: Outline of Ethiopia P'ent'ay Herbert S. Lewis Second Battle of Agordat Treaty of Addis Ababa Ethiopia\u2013Japan relations First Italo-Ethiopian War Battle of Adwa Giuseppe Arimondi Ephigenia of Ethiopia.                                 Answer my question: The battle in which Giuseppe Arimondi lost his life secured what for Ethiopia?. Correct answer:",
+    "golden_answer": "sovereignty"
+  },
+  {
+    "user_question": "Question context: Gordon Johndroe President pro tempore of the United States Senate Robert Nyce Executive Order 10925 Gore-Chernomyrdin Commission Alfred Balk Gerald Ford Jim Lentz Dragan Crnogorac (politician) Cynthia Hogan.                                 Answer my question: Alfred Balk served as the secretary of the Committee on the Employment of Minority Groups in the News Media under which United States Vice President?. Correct answer:",
+    "golden_answer": "Nelson Rockefeller"
+  },
+  {
+    "user_question": "Question context: Scottish Borders Haddington, East Lothian Dirleton Kirk Lothian and Borders Dirleton Yellowcraigs Lord Haliburton of Dirleton John Home Robertson Dirleton Castle St. Mary's Priory (Lothian).                                 Answer my question: A medieval fortress in Dirleton, East Lothian, Scotland borders on the south side of what coastal area?. Correct answer:",
+    "golden_answer": "Yellowcraig"
+  },
+  {
+    "user_question": "Question context: Radiohead Box Set Start Together Nashville Rebel (box set) Led Zeppelin Boxed Set 2 The Doors: Vinyl Box Set Live in Japan (John Coltrane album) Chrome, Smoke &amp; BBQ Back to Mono (1958\u20131969) Trash Box Mono Masters.                                 Answer my question: Who is the writer of this song that was inspired by words on a tombstone and was the first track on the box set Back to Mono?. Correct answer:",
+    "golden_answer": "Phil Spector"
+  },
+  {
+    "user_question": "Question context: Ephraim Sklyansky Mikhail Gorbachev Nikolai Podgorny David Waksberg Feliks Dzerzhinskiy (ship) Andrei Kirilenko (politician) Anastas Mikoyan MS Excelsior Neptune Sergo Mikoyan Mikhail Suslov.                                 Answer my question: What type of forum did a former Soviet statesman initiate?. Correct answer:",
+    "golden_answer": "Organizations could come together to address global issues"
+  },
+  {
+    "user_question": "Question context: Silene menziesii Silene stenophylla Silene tomentosa Silene oregana Silene noctiflora Sex determination in Silene Silene conoidea Silene antirrhina Silene suksdorfii Silene latifolia.                                 Answer my question: Are Ferocactus and Silene both types of plant?. Correct answer:",
+    "golden_answer": "yes"
+  },
+  {
+    "user_question": "Question context: Savoia-Marchetti SM.79 Tupolev Tu-12 South West Pacific Area (command) Asiatic-Pacific Theater Coastwatchers Edwin A. Doss No. 12 Squadron RAAF South West Pacific theatre of World War II English Electric Canberra No. 2 Squadron RAAF.                                 Answer my question: Which British first-generation jet-powered medium bomber was used in the South West Pacific theatre of World War II?. Correct answer:",
+    "golden_answer": "English Electric Canberra"
+  },
+  {
+    "user_question": "Question context: 2012 Colorado Buffaloes football team 2016\u201317 Colorado Buffaloes men's basketball team 2015\u201316 Colorado Buffaloes men's basketball team 2014 Colorado Buffaloes football team 2015 Colorado Buffaloes football team 1989 Colorado Buffaloes football team 2013 Colorado Buffaloes football team 2011 Colorado Buffaloes football team 2014\u201315 Colorado Buffaloes men's basketball team 2010 Colorado Buffaloes football team.                                 Answer my question: Which year and which conference was the 14th season for this conference as part of the NCAA Division that the Colorado Buffaloes played in with a record of 2-6 in conference play?. Correct answer:",
+    "golden_answer": "2009 Big 12 Conference"
+  },
+  {
+    "user_question": "Question context: John A. Brown (department store) SavaCentre Uno-X Holiday Inn Lake Buena Vista Downtown Tesco Extra Tazweed Center Euromarch\u00e9 Selver Carrefour Lewis's.                                 Answer my question: In 1991 Euromarch\u00e9 was bought by a chain that operated how any hypermarkets at the end of 2016?. Correct answer:",
+    "golden_answer": "1,462"
+  },
+  {
+    "user_question": "Question context: Carolina Dodge Dealers 400 Johnny Rutherford 1964 Armstrong 500 Orange County Fair Speedway Lean Horse Ultramarathon Subway 400 Louis Schwitzer Award Orange County Speedway Allison Transmission Bel Air Racetrack.                                 Answer my question: What race track in the midwest hosts a 500 mile race eavery May?. Correct answer:",
+    "golden_answer": "Indianapolis Motor Speedway"
+  },
+  {
+    "user_question": "Question context: Jacopo Puccini La Boh\u00e8me (1988 film) Cesira Ferrani La Boh\u00e8me (2008 film) Ron Bottcher Gianni Schicchi La fanciulla del West Festival Puccini Lilian Sukis O mio babbino caro.                                 Answer my question: In what city did the \"Prince of tenors\" star in a film based on an opera by Giacomo Puccini?. Correct answer:",
+    "golden_answer": "Rome"
+  },
+  {
+    "user_question": "Question context: On My Mind (Ellie Goulding song) List of songs recorded by Ellie Goulding Something in the Way You Move Love Me like You Do Army (Ellie Goulding song) Halcyon (album) Flashlight (DJ Fresh song) Delirium (Ellie Goulding album) Outside (Calvin Harris song) Delirium World Tour.                                 Answer my question: Ellie Goulding worked with what other writers on her third studio album, Delirium?. Correct answer:",
+    "golden_answer": "Max Martin, Savan Kotecha and Ilya Salmanzadeh"
+  },
+  {
+    "user_question": "Question context: Fay School Princeton High School (Illinois) Cotter High School (Winona, Minnesota) Sainik School Balachadi, Jamnagar Westminster School, Adelaide Concho Indian Boarding School Grace Church School Grennaskolan Vishwajyoti Higher Secondary School PNG solution.                                 Answer my question: Which Australian city founded in 1838 contains a boarding school opened by a Prime Minister of Australia and named after a school in London of the same name.. Correct answer:",
+    "golden_answer": "Marion, South Australia"
+  },
+  {
+    "user_question": "Question context: Night School: the Web Series Raaz Pichhle Janam Ka Reset button technique Rising Star (France) Iron Man (TV series) Raimund Harmstorf Ripley's Believe It or Not! (TV series) List of The Office (U.S. TV series) characters Auger electron spectroscopy Katri, Girl of the Meadows.                                 Answer my question: D1NZ is a series based on what oversteering technique?. Correct answer:",
+    "golden_answer": "Drifting"
+  },
+  {
+    "user_question": "Question context: Portland State Vikings football under Jerry Glanville Ken Herock 1989 Houston Oilers season 1990 Atlanta Falcons season 2013 East\u2013West Shrine Game Keith Bostic (American football) Mouse Davis Keith Bostic 1987 Pittsburgh Steelers season Lucky to Be Alive (Confederate Railroad album).                                 Answer my question: who is younger Keith Bostic or Jerry Glanville ?. Correct answer:",
+    "golden_answer": "Keith Bostic"
+  },
+  {
+    "user_question": "Question context: Willoughton Kirton, Suffolk Demographics of Tiruchirappalli 2001 Bangladesh census Urbanisation in India Hockley Borough of Berwick-upon-Tweed Parkridge, Saskatoon Sauce Viejo, Argentina Kirton, Nottinghamshire.                                 Answer my question: According to the 2001 census, what was the population of the city in which Kirton End is located?. Correct answer:",
+    "golden_answer": "35,124"
+  },
+  {
+    "user_question": "Question context: Cypress-pine Fokienia Cupressaceae Cupressus Pilgerodendron Frenchman Formation Libocedrus Ajugeae Cedrol.                                 Answer my question: Are both Cypress and Ajuga genera?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: 2003 WNBA season List of Charlotte Hornets seasons Charlotte Hornets all-time roster Muggsy Bogues Charlotte Hornets draft history 1991\u201392 Charlotte Hornets season Charlotte Hornets Ayana Walker List of Texas Tech Lady Raiders in the WNBA Draft 2014\u201315 Charlotte Hornets season.                                 Answer my question: What distinction is held by the former NBA player who was a member of the Charlotte Hornets during their 1992-93 season and was head coach for the WNBA team Charlotte Sting?. Correct answer:",
+    "golden_answer": "shortest player ever to play in the National Basketball Association"
+  },
+  {
+    "user_question": "Question context: Alien (soundtrack) Christus Apollo Mulan (soundtrack) Legend (film score) Aliens (soundtrack) Innerspace L.A. Confidential (soundtrack) Star Trek: Nemesis (soundtrack) Total Recall (1990 film) Lionheart (1987 film).                                 Answer my question: What is the name of the executive producer of the film that has a score composed by Jerry Goldsmith?. Correct answer:",
+    "golden_answer": "Ronald Shusett"
+  },
+  {
+    "user_question": "Question context: Jane Marcus The Flash Girls The Duchess and the Jeweller Me! I'm Afraid of Virginia Woolf Orlando: A Biography Moments of Being Freshwater (opera) Pamela L. Caughie The Mark on the Wall Jane de Gay.                                 Answer my question: Who was born earlier, Emma Bull or Virginia Woolf?. Correct answer:",
+    "golden_answer": "Adeline Virginia Woolf"
+  },
+  {
+    "user_question": "Question context: Billy Boy Aiken Drum Tweedledum and Tweedledee Girls and Boys Come Out To Play Row, Row, Row Your Boat Did You Ever See a Lassie? Lavender's Blue A Wise Old Owl Pretty Little Dutch Girl Three Little Kittens.                                 Answer my question: What was the Roud Folk Song Index of the nursery rhyme inspiring What Are Little Girls Made Of?. Correct answer:",
+    "golden_answer": "821"
+  },
+  {
+    "user_question": "Question context: Corporate synergy PRX-07034 Exxon Oregon and Transcontinental Company Mobil Producing Nigeria Dummy corporation Religious Technology Center Scott Parkin Boris Berezovsky (businessman) Yvonne Ridley.                                 Answer my question: Scott Parkin has been a vocal critic of Exxonmobil and another corporation that has operations in how many countries ?. Correct answer:",
+    "golden_answer": "more than 70 countries"
+  },
+  {
+    "user_question": "Question context: List of Charmed characters Kay Tagal Kang Hinintay Charmed (season 4) Safe Harbor (TV series) Charmed Sarah Drew Power of Three (Charmed) Kerr Smith Rose McGowan Sophia Bush.                                 Answer my question: What WB supernatrual drama series was Jawbreaker star Rose Mcgowan best known for being in?. Correct answer:",
+    "golden_answer": "Charmed"
+  },
+  {
+    "user_question": "Question context: Lawrence Austin Julian Holland (boxer) Chris Algieri Andrew Murray (Guyanese boxer) Bernard Paul (boxer) Jeff Malcolm Ralph Charles Bunny Grant Zab Judah Fatai Onikeke.                                 Answer my question: Vince Phillips held a junior welterweight title by an organization recognized by what larger Hall of Fame?. Correct answer:",
+    "golden_answer": "International Boxing Hall of Fame"
+  },
+  {
+    "user_question": "Question context: U Know What's Up My Fair Lady (Broadway cast recording) Stay (Sugarland song) Feel Good Inc. Can't Touch It Stay (Shakespears Sister song) No One (Alicia Keys song) I Don't Wanna Know Cadillac (album) Billy Ray Cyrus discography.                                 Answer my question: What is the name of the singer who's song was released as the lead single from the album \"Confessions\", and that had popular song stuck behind for eight consecutive weeks?. Correct answer:",
+    "golden_answer": "Usher"
+  },
+  {
+    "user_question": "Question context: Traitor's Gate (Spooks) The Farm (The Office) The Hard Easy (Adventure Time) The Hard Easy (film) Roy's Wedding Brother from Another Series Moving On (The Office) Web Weirdos Andy's Ancestry Evicted!.                                 Answer my question: who is the younger brother of The episode guest stars of The Hard Easy . Correct answer:",
+    "golden_answer": "Bill Murray"
+  },
+  {
+    "user_question": "Question context: 2006\u201307 Wigan Athletic F.C. season Springfield Park (Wigan) Trinidad and Tobago League Cup 2002\u201303 Wigan Athletic F.C. season 2004\u201305 Wigan Athletic F.C. season 2007\u201308 Wigan Athletic F.C. season Nick Powell 1978\u201379 Wigan Athletic F.C. season 1979\u201380 Wigan Athletic F.C. season List of Wigan Borough F.C. players.                                 Answer my question: The 2017\u201318 Wigan Athletic F.C. season will be a year in which the team competes in the league cup known as what for sponsorship reasons?. Correct answer:",
+    "golden_answer": "Carabao Cup"
+  },
+  {
+    "user_question": "Question context: Roy Harper (comics) Tara Strong filmography Teen Titans Go! (TV series) List of Teen Titans episodes Teen Titans (season 1) List of Teen Titans Go! episodes Teen Titans Teen Titans: Trouble in Tokyo Teen Titans (season 4) Tara Strong.                                 Answer my question: Which of Tara Strong major voice role in animated series is an American animated television series based on the DC Comics fictional superhero team, the \"Teen Titans\"?. Correct answer:",
+    "golden_answer": "Teen Titans Go!"
+  },
+  {
+    "user_question": "Question context: 122nd (Muskoka) Battalion, CEF 122nd SS-Standarte 122nd Division 122nd Infantry Division (Wehrmacht) 122nd Fighter Aviation Squadron 122d Fighter Squadron 122nd Hydroplane Liaison Squadron 122nd Infantry Regiment (United States) 122nd Ohio Infantry 122nd Division (Imperial Japanese Army).                                 Answer my question: What is the inhabitant of the city where  122nd SS-Standarte was formed in2014. Correct answer:",
+    "golden_answer": "276,170 inhabitants"
+  },
+  {
+    "user_question": "Question context: Koningsdag Garifuna Settlement Day White Sunday Christmas in the Basque Country The Eighth (United States) Jounen Kw\u00e9y\u00f2l Saint-Jean-Baptiste Day Oranjegekte Children's Day (Japan) Queen's Day (disambiguation).                                 Answer my question: What color clothing do people of the Netherlands wear during Oranjegekte or to celebrate the national holiday Koningsdag? . Correct answer:",
+    "golden_answer": "orange"
+  },
+  {
+    "user_question": "Question context: James Gunn Tromeo and Juliet Romeo \u00d7 Juliet Romeo and Juliet on screen List of Romeo \u00d7 Juliet episodes A rose by any other name would smell as sweet James Gunn's PG Porn Romeo Romeo + Juliet The Tragedy of Romeo and Juliet (film).                                 Answer my question: What was the name of the 1996 loose adaptation of William Shakespeare's \"Romeo & Juliet\" written by James Gunn?. Correct answer:",
+    "golden_answer": "Tromeo and Juliet"
+  },
+  {
+    "user_question": "Question context: National Intelligence Medal for Valor Ground Intelligence Officer Director of the Defense Intelligence Agency National Intelligence Cross National Intelligence Medal of Achievement National Intelligence Superior Service Medal National Intelligence Board Robert Suettinger National Intelligence Reform Medal National Intelligence Estimate.                                 Answer my question: Robert Suettinger was the national intelligence officer under which former Governor of Arkansas?. Correct answer:",
+    "golden_answer": "William Jefferson Clinton"
+  },
+  {
+    "user_question": "Question context: Moche Rip Curl Pro Portugal 2015 MEO Rip Curl Pro Portugal Coco Ho MEO Rip Curl Pro Portugal 2016 Damien Hardman MEO Rip Curl Pro Portugal 2017 Supertubos Moche Rip Curl Pro Portugal 2014 Barton Lynch Andy Irons.                                 Answer my question: What American professional Hawaiian surfer born 18 October 1992 won the Rip Curl Pro Portugal?. Correct answer:",
+    "golden_answer": "John John Florence"
+  },
+  {
+    "user_question": "Question context: Marion Christopher Barry Chris Funk Jeff Strabone Bobbi Bacha Suburban Madness Latvian name Middle name Barend Singh Milhouse Van Houten.                                 Answer my question: What is the middle name of the actress who plays Bobbi Bacha in Suburban Madness?. Correct answer:",
+    "golden_answer": "Ann"
+  },
+  {
+    "user_question": "Question context: Embassy of China, London Diplomatic mission Head of mission Diplomatic bag High Commission of Australia, London Alvaro Mexia Embassy of Algeria, Islamabad Embassy of the United States, Nairobi United States Mission to the European Union List of diplomatic missions of Azerbaijan.                                 Answer my question: Alvaro Mexia had a diplomatic mission with which tribe of indigenous people?. Correct answer:",
+    "golden_answer": "Apalachees"
+  },
+  {
+    "user_question": "Question context: Network Analysis and Ethnographic Problems Participant observation Social Anthropology (journal) Muted group theory Symbolic culture Association of Social Anthropologists Aleksandar Bo\u0161kovi\u0107 Coral Gardens and Their Magic Alfred Gell Thomas Hylland Eriksen.                                 Answer my question: What nationality were social anthropologists Alfred Gell and Edmund Leach?. Correct answer:",
+    "golden_answer": "British"
+  },
+  {
+    "user_question": "Question context: 2013 Birthday Honours 2014 Birthday Honours Birthday Honours 1925 Birthday Honours Henry Greer (politician) 2016 Birthday Honours 2017 Birthday Honours 2015 Birthday Honours 1951 Birthday Honours 1965 Birthday Honours.                                 Answer my question: In which year was the King who made the 1925 Birthday Honours born?. Correct answer:",
+    "golden_answer": "1865"
+  },
+  {
+    "user_question": "Question context: Miner Memorial Library Dover, New Hampshire Carroll County, New Hampshire Hampden County, Massachusetts Woodsville, New Hampshire Lempster, New Hampshire Essex County, Vermont Gardnerville Branch Jail Steven D. Smith East Lempster, New Hampshire.                                 Answer my question: What is the county seat of the county where East Lempster, New Hampshire is located?. Correct answer:",
+    "golden_answer": "Newport"
+  },
+  {
+    "user_question": "Question context: Heaven Knows (Robert Plant song) 10 Hronia Mazi Mark Britten Stranger in Town (album) Gary Cherone Ride Out (album) Bob Seger Anggun discography Freudiana Against the Wind (album).                                 Answer my question: The Album Against the Wind was the 11th Album of a Rock singer Robert C Seger born may 6 1945. What was the Rock singers stage name ?. Correct answer:",
+    "golden_answer": "Bob Seger"
+  },
+  {
+    "user_question": "Question context: Chief of the Defence Staff (Canada) One Rank, One Pension Armed Forces Covenant Fernando Tapias Stahelin Franklin D. Roosevelt's record on civil rights Armed Forces Day (Poland) 2010 Kiev Victory Day Parade Conscription in the United States Rostker v. Goldberg September 16 military parade.                                 Answer my question: Rostker v. Goldberg held that the practice of what way of filling armed forces vacancies was consitutional?. Correct answer:",
+    "golden_answer": "Conscription"
+  },
+  {
+    "user_question": "Question context: PepsiCo Rewrapped Twisties Snack Foods Limited Mondelez International Robert's American Gourmet Food Canyon Creek Food Company Handi-Snacks Snackbox Food Holdings Deep-fried peanuts.                                 Answer my question: Handi-Snacks are a snack food product line sold by what American multinational confectionery, food, and beverage company that is based in Illinois?. Correct answer:",
+    "golden_answer": "Mondelez International, Inc."
+  },
+  {
+    "user_question": "Question context: Once Upon a Secret Sheila Cavanagh Mark D. Fabiani Monica Lewinsky The White House Doctor Gregory B. Craig Their Lives Eric Schultz Lewinsky scandal William H. Ginsburg.                                 Answer my question: What was the name of a woman from the book titled \"Their Lives: The Women Targeted by the Clinton Machine \" and was also a former white house intern?. Correct answer:",
+    "golden_answer": "Monica Lewinsky"
+  },
+  {
+    "user_question": "Question context: Donald Trump in music Protests against Donald Trump Tony Fabrizio David Urban Paul Manafort Immigration policy of Donald Trump Hope Hicks Brad Parscale Donald Trump presidential campaign, 2000 Donald Trump (Last Week Tonight).                                 Answer my question: When was the American lawyer, lobbyist and political consultant who was a senior member of the presidential campaign of Donald Trump born?. Correct answer:",
+    "golden_answer": "April 1, 1949"
+  },
+  {
+    "user_question": "Question context: Quando Eu Era Vivo 4 a.m. (novel) Before We Say Goodbye The Witch's Daughter Drained Buckskin Brigades The Birds on the Trees Three Comrades (novel) The Golden Hour (novel) Spirit of the Border.                                 Answer my question: In what year was the novel that Louren\u00e7o Mutarelli based \"Nina\" on based first published?. Correct answer:",
+    "golden_answer": "1866"
+  },
+  {
+    "user_question": "Question context: Garajonay National Park North Cascades National Park Roque Cinchado Adenocarpus viscosus Training centre for release of the Atma-energy Teide National Park Crater Lake National Park Glacier National Park Fund Hermigua Alpine National Park.                                 Answer my question: Where are Teide National Park and Garajonay National Park located?. Correct answer:",
+    "golden_answer": "Canary Islands, Spain"
+  },
+  {
+    "user_question": "Question context: The Collected Short Stories of Roald Dahl Roald Dahl's Willy Wonka (musical) The Roald Dahl Treasury Roald Dahl Children's Gallery Mrs. Bixby and the Colonel's Coat Roald Dahl: Collected Stories Roald Dahl Plass The Best of Roald Dahl Tales of the Unexpected (short story collection) Roald Dahl short stories bibliography.                                 Answer my question: How many copies of Roald Dahl's variation on a popular anecdote sold?. Correct answer:",
+    "golden_answer": "250 million"
+  },
+  {
+    "user_question": "Question context: CrissCross Made in Britain The Lost Son (film) Linda Mvusi End of the Road (1970 film) A World Apart (film) 11 Harrowhouse Second Best (film) Chris Menges Cops and Robbers (1973 film).                                 Answer my question: What occupation do Chris Menges and Aram Avakian share?. Correct answer:",
+    "golden_answer": "director"
+  },
+  {
+    "user_question": "Question context: Advice column EvidenceNetwork.ca State media 14ymedio The Conversation (website) Accessible Media Andrew Jaspan Vatican leaks scandal Chicago Public Media 990WBOB.                                 Answer my question: Andrew Jaspan was the co-founder of what not-for-profit media outlet?. Correct answer:",
+    "golden_answer": "The Conversation"
+  },
+  {
+    "user_question": "Question context: Mihai M\u0103laimare Jr. Independent Spirit Award for Best Editing 32nd Independent Spirit Awards Silent Light Independent Spirit Award for Best Cinematography Independent Spirit Award for Best Film 28th Independent Spirit Awards Independent Spirit Award for Best First Feature Independent Spirit Awards Neil LaBute.                                 Answer my question: Which American film director hosted the 18th Independent Spirit Awards in 2002?. Correct answer:",
+    "golden_answer": "John Waters"
+  },
+  {
+    "user_question": "Question context: Bill Cosby Is a Very Funny Fellow...Right! At Last Bill Cosby Really Sings Yes, Yes, Yes Disco Bill Why Is There Air? Bill Cosby Talks to Kids About Drugs Bill's Best Friend The Original Jam Sessions 1969 Hikky Burr Inside the Mind of Bill Cosby.                                 Answer my question: Where does the hotel and casino located in which Bill Cosby's third album was recorded?. Correct answer:",
+    "golden_answer": "Las Vegas Strip in Paradise"
+  },
+  {
+    "user_question": "Question context: Energy shot Soft drink Gibson (cocktail) Tum-E Yummies Gin pennant List of soft drinks by country Rubicon Drinks Flaming beverage Phillips Distilling Company CytoSport.                                 Answer my question: Do the drinks Gibson and Zurracapote both contain gin?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: New Haven Documentary Film Festival Thomas Gordon (writer) Docville Chagrin Documentary Film Festival London International Documentary Festival Doc NYC FreedomFilmFest London Review of Books British Journal British Journal of Social Psychology.                                 Answer my question: In what month is the annual documentary film festival, that is presented by the fortnightly published British journal of literary essays, held? . Correct answer:",
+    "golden_answer": "March and April"
+  },
+  {
+    "user_question": "Question context: West McLean, Virginia Tysons Galleria Scott's Run Nature Preserve Poughkeepsie Galleria Tysons, Virginia McLean, Virginia McLean station Tysons Corner Center Cobb Galleria Centre Spring Hill station.                                 Answer my question: Tysons Galleria is located in what county?. Correct answer:",
+    "golden_answer": "Fairfax County"
+  },
+  {
+    "user_question": "Question context: Owens &amp; Minor Compass Minerals Cardinal Health Kingstone Companies Jonathan Michael Ansell Terren Peizer BankUnited Schr\u00f6dinger (company) Clean Power Finance Bordan Tkachuk.                                 Answer my question: Bordan Tkachuk was the CEO of a company that provides what sort of products?. Correct answer:",
+    "golden_answer": "IT products and services"
+  },
+  {
+    "user_question": "Question context: Lev Kuleshov Anani ben Sason Aryanto Yuniawan Pamela B. Green Pamela B. Davis Pamela Gilbert Seasoned Veteran Total (group) Eliezer ben Jacob I AES+F.                                 Answer my question: Which filmmaker was known for animation, Lev Yilmaz or Pamela B. Green?. Correct answer:",
+    "golden_answer": "Levni Yilmaz"
+  },
+  {
+    "user_question": "Question context: Liaison Office (Hong Kong) Rabat Caraga Visa policy of Hong Kong Sinuiju Special Administrative Region Hong Kong Basic Law Wolong Special Administrative Region Ilocos Region 2014 NPCSC Decision on Hong Kong Rocket of China (TV series).                                 Answer my question: In which city is the ambassador of the Rabat-Sal\u00e9-K\u00e9nitra administrative region to China based?. Correct answer:",
+    "golden_answer": "Beijing"
+  },
+  {
+    "user_question": "Question context: Bayuquan Railway Station Shengjing Bank Xiapu County Wafangdian Fuding Railway Station Yingkou East Railway Station Yingkou Lanqi Airport Taimushan Railway Station Tongcheng Subdistrict, Fuding Roman Catholic Diocese of Yingkou.                                 Answer my question: Are Yingkou and Fuding the same level of city?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: Muscogee language Black Indians in the United States Seminole Draining and development of the Everglades Seminole music Seminole County, Oklahoma Battle of Jupiter Inlet Seminole Nation of Oklahoma Dhoolpet Black Seminoles.                                 Answer my question: Where did the descendants of the group of black Indians associated with the Seminole people settle?. Correct answer:",
+    "golden_answer": "Coahuila, Mexico"
+  },
+  {
+    "user_question": "Question context: Charles Charamba Andra\u00e9 Crouch Just as I Am (Yolanda Adams album) Kierra Sheard Latice Crawford Yolanda Adams David Huntsinger J-Shin Karen Clark Sheard Muyiwa Olarewaju.                                 Answer my question: David Huntsinger has worked with this gospel singer born in the month of July?. Correct answer:",
+    "golden_answer": "Larnelle Harris"
+  },
+  {
+    "user_question": "Question context: Anthony Woodson Ron Snidow 1987\u201388 Quebec Nordiques season Fred Hageman Robin Cole LaRon Landry Marc Parenteau Tom Draper Darius Hanks Jeris White.                                 Answer my question: What year was the brother of this first round draft pick by the Washington Redskins drafted?. Correct answer:",
+    "golden_answer": "2003"
+  },
+  {
+    "user_question": "Question context: 1990 Georgia Tech Yellow Jackets football team 1964 Georgia Tech Yellow Jackets football team 1987 Georgia Tech Yellow Jackets football team 2012 Georgia Tech Yellow Jackets football team Georgia Tech Yellow Jackets football 1953 Georgia Tech Yellow Jackets football team 1988 Georgia Tech Yellow Jackets football team Georgia Tech Yellow Jackets men's basketball 1980 Georgia Tech Yellow Jackets football team 1959 Georgia Tech Yellow Jackets football team.                                 Answer my question: Where is the stadium at which 1964 Georgia Tech Yellow Jackets football team played their home game located? . Correct answer:",
+    "golden_answer": "North Avenue at Techwood Drive"
+  },
+  {
+    "user_question": "Question context: Simon Coveney Paddy O'Toole Fine Gael leadership election, 2017 Enda Kenny Leo Varadkar Charles Flanagan Liam Cosgrave John Bruton Frances Fitzgerald (politician) James Reilly (Irish politician).                                 Answer my question: Since 2 June 2017, The Leader of Fine Gael had been held by which Irish Fine Gael politician who has served as Taoiseach and Minister for Defence?. Correct answer:",
+    "golden_answer": "Leo Varadkar"
+  },
+  {
+    "user_question": "Question context: Johnny Angel William D. Russell (director) Johnny Lee Clary Claudia Drake Shelley Fabares Johnny Angel (song) Johnny Angel Wendell A Kiss for Corliss Cool from the Wire G\u00f6sta Pr\u00fczelius.                                 Answer my question: Which American film actor and dancer starred in the 1945 film Johnny Angel?. Correct answer:",
+    "golden_answer": "George Raft"
+  },
+  {
+    "user_question": "Question context: Lenelle Mo\u00efse Jeffrey Stanley Aramazd Stepanian DeObia Oparei Michael Wynne (playwright) Juan Garc\u00eda Larrondo Finn Iunker Sumie Tanaka Bertha Runkle James Roland MacLaren.                                 Answer my question: hree Men on a Horse is a play by a playwright born in which year ?. Correct answer:",
+    "golden_answer": "1887"
+  },
+  {
+    "user_question": "Question context: George D. Buffett TaeguTec Owner earnings Susan Buffett Susan Alice Buffett The Warren Buffett Way Buffett Foundation Peter Buffett Howard Graham Buffett Howard Warren Buffett.                                 Answer my question: What type of activity does Owner earnings and Warren Buffett have in common?. Correct answer:",
+    "golden_answer": "business"
+  },
+  {
+    "user_question": "Question context: 1998 ICC KnockOut Trophy Final 1998 ICC KnockOut Trophy squads 2000 ICC KnockOut Trophy squads Guy Randall-Johnson 2000 ICC KnockOut Trophy Sam Davies (cricketer) Lindum Sports Club Ground Sridharan Sharath Digswell Park Peter Kingston-Davey.                                 Answer my question: When was the  former Indian cricketer who made his ODI debuts during the 2000 ICC KnockOut Trophy born? . Correct answer:",
+    "golden_answer": "7 October 1978"
+  },
+  {
+    "user_question": "Question context: 514th Flight Test Squadron 10th Flight Test Squadron 413th Flight Test Squadron 370th Flight Test Squadron 445th Flight Test Squadron 339th Flight Test Squadron 419th Flight Test Squadron 417th Flight Test Squadron 415th Flight Test Flight 486th Flight Test Squadron.                                 Answer my question: Which airplane was this Major test-flying after whom the base, that 514th Flight Test Squadron is stated at, is named?. Correct answer:",
+    "golden_answer": "B-17 Flying Fortress bomber"
+  },
+  {
+    "user_question": "Question context: Keyed Up Country Music Star No. 1 Stranger in the House (song) Gruhn Guitars Randy Travis Christy Sutherland This Is Me (Randy Travis album) Based on a True Story... Old 8\u00d710 My Eyes (Blake Shelton song).                                 Answer my question: Based on a True Story... is an album by which country music star, with the single My Eyes?. Correct answer:",
+    "golden_answer": "Blake Shelton"
+  },
+  {
+    "user_question": "Question context: Andlang Takama-ga-hara Oldest synagogues in the United Kingdom Ch\u00e2teau de Druyes V\u00eddbl\u00e1in Inquiline Heaven in Judaism List of oldest synagogues Flaming Feather Tabernacle.                                 Answer my question: Over how many centuries were the \"dwelling place of the dead\" built?. Correct answer:",
+    "golden_answer": "three centuries"
+  },
+  {
+    "user_question": "Question context: Christopher Mitchell (actor) Roy Holder The Wheels on the Bus Clive Donner Michael Finnegan (song) Here We Go Round the Mulberry Bush (film) Here We Go Round the Mulberry Bush (disambiguation) Here We Go Round the Mulberry Bush (Traffic song) Traffic (band) Here We Go Round the Mulberry Bush.                                 Answer my question: When was the British author who wrote the novel on which \"Here We Go Round the Mulberry Bush\" was based born? . Correct answer:",
+    "golden_answer": "7 January 1936"
+  },
+  {
+    "user_question": "Question context: Thrill of a Lifetime (film) Campus Confessions Flying with Music Criminal Lawyer The Millerson Case Handcuffs or Kisses Hoppy Serves a Writ Arthur Roberts (editor) Alias French Gertie The Big Brain.                                 Answer my question: Who died first, George Archainbaud or Ralph Murphy?. Correct answer:",
+    "golden_answer": "George Archainbaud"
+  },
+  {
+    "user_question": "Question context: Conductivity near the percolation threshold 1-Pentanol Aldonic acid Isopropyl alcohol 1-Hexanol Tetrakis(hydroxymethyl)phosphonium chloride Seidel's algorithm Index of alcohol-related articles Xylitol Gluconic acid.                                 Answer my question: Which component of shellite has the formula (ON)CHOH?. Correct answer:",
+    "golden_answer": "picric acid"
+  },
+  {
+    "user_question": "Question context: Northern California PGA Championship 1977 PGA Championship Middle Atlantic PGA Championship Connecticut PGA Championship 2000 PGA Championship 1940 PGA Championship Argentine PGA Championship 2006 PGA Championship 1939 PGA Championship 2018 PGA Championship.                                 Answer my question: The Argentine PGA Championship record holder has won how many tournaments worldwide?. Correct answer:",
+    "golden_answer": "230"
+  },
+  {
+    "user_question": "Question context: Levolution (album) A Boy in a Man's World Deceit (Doctor Who novel) In My Country There Is Problem Nagaram (2010 film) Impossible Dream A Week of Garfield Children Running Through Music of Hair Kiss (Carly Rae Jepsen album).                                 Answer my question: Suicide's 1977 released album features a song based on what brand's comic character?. Correct answer:",
+    "golden_answer": "Marvel"
+  },
+  {
+    "user_question": "Question context: Vice President of Panama Abteilungsleiter (NSDAP) Public Law 113-167 Hannah Gale Attorney misconduct DISCLOSE Act Campaign finance reform in the United States World Tamil Movement State Secretary (Norway) Modernization of Investigative Techniques Act.                                 Answer my question: What other political position did the person who introduced the DISCLOSE Act hold?. Correct answer:",
+    "golden_answer": "United States Senator"
+  },
+  {
+    "user_question": "Question context: Mark Arm Fist Sized Chunks Matt Cameron Inside the Eye Skin Yard (album) Cat Butt Gruntruck Chris Hanzsek Daniel House Jack Endino.                                 Answer my question: Were the bands Skin Yard and Ostava from the U.S.?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: Hall &amp; Oates Janna Allen Big Bam Boom Jonathan Wolfson Ferry Cross the Mersey Live from Daryl's House One on One (song) Don't Let the Sun Catch You Crying Did It in a Minute Say It Isn't So (Hall &amp; Oates song).                                 Answer my question: Are Daryl Hall and Gerry Marsden both musicians?. Correct answer:",
+    "golden_answer": "yes"
+  },
+  {
+    "user_question": "Question context: U.S. Route 19 Truck (Pittsburgh) Pureland Industrial Complex Portland and Southwestern Railroad Tunnel Al Haj FAW motors Truck stop Strawberry Park, Cheshire Param, Rampur A5117 road U.S. Route 287 Backford Cross.                                 Answer my question: What major truck road is located in Backford Cross?. Correct answer:",
+    "golden_answer": "The A41"
+  },
+  {
+    "user_question": "Question context: Snow Queen (2002 film) La Femme Musketeer The Magical Legend of the Leprechauns Silver Bells (film) The Boys Next Door (1996 film) Donald J. Hall Jr. Caroline Carver (actress) Snow White: The Fairest of Them All Family Plan You Me and Captain Longbridge.                                 Answer my question: In which role did Caroline Carver played in a 1999 Hallmark Entertainment made-for-TV fantasy movie?. Correct answer:",
+    "golden_answer": "Princess Jessica"
+  },
+  {
+    "user_question": "Question context: The Moth Diaries (film) John Ridge Magic in Harry Potter Identity Films Dark Knight (TV series) Barbie and the Secret Door The Spiderwick Chronicles (film) Sinbad of the Seven Seas Stormbreaker (film) As Cool as I Am (film).                                 Answer my question: What's the name of the fantasy film starring Sarah Bolger, featuring a New England family who discover magical creatures around their estate?. Correct answer:",
+    "golden_answer": "The Spiderwick Chronicles"
+  },
+  {
+    "user_question": "Question context: Leeds Equity Partners Polycom Court Square Capital Partners Mekong Capital Maxeda Avenue Capital Group HGGC Kohlberg Kravis Roberts Lincolnshire Management Manischewitz.                                 Answer my question: Maxeda has been owned since 2004 by which American multinational equity firm?. Correct answer:",
+    "golden_answer": "KKR & Co"
+  },
+  {
+    "user_question": "Question context: Princess Olga of Hanover Chainsaw (Scream Queens) Sian Powers One Night in Istanbul Gelston Castle Lady Alexandra Curzon Love Beats Rhymes Bottom of the World (film) Cressida Bonas The Bye Bye Man.                                 Answer my question: The youngest daughter of Lady Mary-Gaye Curzon stars with Douglas Smith and Lucien Laviscount  in what 2017 film?. Correct answer:",
+    "golden_answer": "The Bye Bye Man"
+  },
+  {
+    "user_question": "Question context: Casino, New South Wales Tabulam Bruxner Highway Wollongbar, New South Wales Alstonville, New South Wales Richmond Valley Council Mummulgum Tenterfield, New South Wales Bonshaw, New South Wales Goonellabah, New South Wales.                                 Answer my question: Mummulgum is a stop on the Bruxner Highway before reaching the town on the banks of which river?. Correct answer:",
+    "golden_answer": "Richmond"
+  },
+  {
+    "user_question": "Question context: Owsley Stanley San Francisco Bay Area Water Trail Ragazzi Boys Chorus Gary Arlington Oakland, California San Francisco Bay Restoration Authority Association of Bay Area Governments Codornices Creek Jory Prum Key System.                                 Answer my question: Which American audio engineer and clandestine chemist, who was a key figure in the San Francisco Bay Area hippie movement during the 1960s recorded the album \"Old and in the Way?\". Correct answer:",
+    "golden_answer": "Owsley Stanley"
+  },
+  {
+    "user_question": "Question context: Bishop Dunbar's Hospital Columba de Dunbar Haripur Barabari Patrick IV, Earl of March George II, Earl of March Gospatric, Earl of Northumbria Patrick V, Earl of March Mike Dunbar George I, Earl of March Earl of Dunbar.                                 Answer my question: When was the palace founded at which Columba de Dunbar died in 1435?. Correct answer:",
+    "golden_answer": "the late 12th Century"
+  },
+  {
+    "user_question": "Question context: Philadelphia Baseball Wall of Fame Louden Monorail System in the Auto Repair Shop Gum Wall Up Your Alley Fair Lower Louviers and Chicken Alley Bubblegum Alley Ouch! (gum) Old US 67 Rest Area Digital Media Factory Hollywood Star Lanes.                                 Answer my question: Where is the Bubblegum Alley, that is similar to Gum Wall, located in California?. Correct answer:",
+    "golden_answer": "San Luis Obispo, California"
+  },
+  {
+    "user_question": "Question context: Dead or Alive 5 Plus 2008 Fiesta Bowl 1989 Cotton Bowl Classic 2013 Sugar Bowl 1956 NAIA Division I Men's Basketball Tournament 2017 NHL Winter Classic 1989 Fiesta Bowl 1943 NAIA Division I Men's Basketball Tournament List of NBL Canada All-Stars Parkway Field.                                 Answer my question: At what venue was the January 2, 2012 game featured the University of Louisville team?. Correct answer:",
+    "golden_answer": "Mercedes-Benz Superdome"
+  },
+  {
+    "user_question": "Question context: LaLee's Kin: The Legacy of Cotton Keith Richards Merry Clayton Gimme Shelter (1970 film) Baird Bryant Gimme Shelter (album) Gimme Shelter Altamont Diary Gimme Shelter (disambiguation) Stanton Y. Hill.                                 Answer my question: Which film was Oscar nominated, LaLee's Kin: The Legacy of Cotton or Gimme Shelter, the 1970 Rolling Stones documentary?. Correct answer:",
+    "golden_answer": "LaLee's Kin: The Legacy of Cotton"
+  },
+  {
+    "user_question": "Question context: Catan: Cities &amp; Knights Catan (2008 video game) Struggle for Rome (board game) Catan Catan Card Game Catan Dice Game Elasund Catan: Seafarers The Kids of Catan The Rivals for Catan.                                 Answer my question: Which board game was published most recently, Pirate's Cove or Catan?. Correct answer:",
+    "golden_answer": "Pirate's Cove"
+  },
+  {
+    "user_question": "Question context: Tomb Raider III Lara Croft Go Lara Croft Lara Croft and the Temple of Osiris Alice David Lara Croft and the Guardian of Light Toby Gard Lara Croft: Tomb Raider Tomb Raider List of Tomb Raider media.                                 Answer my question: Alice David is the voice of Lara Croft in a video game developed by which company ?. Correct answer:",
+    "golden_answer": "Crystal Dynamics"
+  },
+  {
+    "user_question": "Question context: You and Me (Uniting Nations song) List of songs recorded by Linkin Park Better Off Alone Rabid Neurosis Barbara Higbie Encore (Eminem song) Not Afraid Numb (Rihanna song) Drop the World In Death Reborn.                                 Answer my question: Which Eminem album included vocals from a singer who had an album titled \"Unapologetic\"?. Correct answer:",
+    "golden_answer": "\"The Marshall Mathers LP 2\""
+  },
+  {
+    "user_question": "Question context: Bonsallo Avenue DoubleTree by Hilton Hotel Los Angeles Downtown Harsh Times Street Kings 2: Motor City West Athens, California End of Watch David Ayer Barriox13 Central Avenue (Los Angeles) South of 8.                                 Answer my question: This American crime film set in South Los Angeles was written and directed by the same director and writer of screenwriter of \"Street Kings\", \"End of Watch\", \"Sabotage\", \"Fury\" and what other film? . Correct answer:",
+    "golden_answer": "Suicide Squad"
+  },
+  {
+    "user_question": "Question context: Jo Marie Payton Mitch Pileggi Julian Bailey (actor) Hilarie Burton John Amos Jeff Hephner Sonequa Martin-Green Helen Modern John Pappas Jenna Dewan.                                 Answer my question: SuperMansion starred the actress who had a recurring role as whom on Workaholics?. Correct answer:",
+    "golden_answer": "Jillian Belk"
+  },
+  {
+    "user_question": "Question context: 1974 Texas Tech Red Raiders football team Texas Tech Red Raiders football 1986 Texas Tech Red Raiders football team 2013 Texas Tech Red Raiders football team Texas A&amp;M\u2013Texas Tech football rivalry 2015 Texas Tech Red Raiders football team 2016 Texas Tech Red Raiders football team 2012 Texas Tech Red Raiders football team 2009 Texas Tech Red Raiders football team 2014 Texas Tech Red Raiders football team.                                 Answer my question: The 1974 Texas Tech Raiders football team represented what public research university in Lubbock, Texas?. Correct answer:",
+    "golden_answer": "Texas Tech University"
+  },
+  {
+    "user_question": "Question context: Stapleton Cotton, 1st Viscount Combermere Maharaja Surajmal Brij University, Bharatpur Commander-in-Chief, Land Forces Commander-in-Chief, India Vishvendra Singh Claude Auchinleck Siege of Bharatpur (1805) Bharatpur district Bharatpur, Rajasthan Lohagarh Fort.                                 Answer my question: During Siege of Bharatpur, which Commander-in-Chief of Ireland and Commander-in-Chief of India contributed to the storming of the castle?. Correct answer:",
+    "golden_answer": "Lord Combermere"
+  },
+  {
+    "user_question": "Question context: Santa Claus Is a Black Man Santa Claus (1898 film) The Year Without a Santa Claus (2006 film) Santa Claus in film A Miser Brothers' Christmas Santa's Workshop (Colorado) The Year Without a Santa Claus Santa Claus: The Movie Larry Wilson (screenwriter) Jonathan Meath.                                 Answer my question: For what type of work is the production company for The Year Without a Santa Claus best known?. Correct answer:",
+    "golden_answer": "seasonal television specials, particularly its work in stop motion animation"
+  },
+  {
+    "user_question": "Question context: The Naked Brothers Band: Music from the Movie Nat Wolff The Naked Brothers Band (album) Alex Wolff The Naked Brothers Band (video game) Mystery Girl (film) I Don't Want to Go to School The Premiere (film) Nat and Alex Wolff Operation Mojo.                                 Answer my question: What year was the film that starred the composer for \"The Naked Brothers Band\"?. Correct answer:",
+    "golden_answer": "2014"
+  },
+  {
+    "user_question": "Question context: Harris G. Mirkin Contract with the World Susie Bright Au Pairs (band) Laura Kipnis C. V. Balakrishnan British University Hurling Championship Carol J. Adams Shannon Bell Kate Millett.                                 Answer my question: The author of Sexual Politics attended which British University?. Correct answer:",
+    "golden_answer": "Oxford"
+  },
+  {
+    "user_question": "Question context: 2011 Barcelona Ladies Open \u2013 Doubles Flavia Pennetta 2015 Wimbledon Championships \u2013 Women's Doubles 2015 Rogers Cup \u2013 Women's Doubles 1994 Athens International \u2013 Doubles Jorge Lozano Morbo (band) 1988 Volvo International \u2013 Doubles Marta Domachowska Roberta Vinci.                                 Answer my question: Who had the best singles ranking, Roberta Vinci or Jorge Lozano?. Correct answer:",
+    "golden_answer": "Roberta Vinci"
+  },
+  {
+    "user_question": "Question context: Truth Initiative Truth in Science The Last Embrace Curiosity (TV series) Truth (anti-tobacco campaign) I Am... Gabriel Discovery Museum and Planetarium Discovery Networks Benelux Every Voice Extrema (band).                                 Answer my question: Both Truth in Science and Discovery embrace what campaign?. Correct answer:",
+    "golden_answer": "\"Teach the Controversy\" campaign"
+  },
+  {
+    "user_question": "Question context: In It to Win It (Saliva album) We Bring an Arsenal Under Your Skin (album) Josey Scott For He's a Jolly Good Felon Always (Saliva song) Family Reunion (Saliva song) Lostprophets Where We Belong (Lostprophets song) Shinobi vs. Dragon Ninja.                                 Answer my question: Josey Scott and Ian Watkins were both promising musicians. Which of these talented men was incarcerated, impacting his career with a rock band?. Correct answer:",
+    "golden_answer": "Lostprophets disbanded in 2013 after Watkins was charged with sexual offences in late 2012."
+  },
+  {
+    "user_question": "Question context: Whitney Rydbeck The Scarlet Flower (1952 film) I Was a Satellite of the Sun Older Sister Tracker (1987 film) Battle Beyond the Sun The Key (1961 film) Girl Seeks Father Battle Beyond the Stars All Costs Paid.                                 Answer my question: The movies Queen of Blood and Battle Beyond the Sun both contained scenes from what 1959 Soviet feature?. Correct answer:",
+    "golden_answer": "Nebo Zovyot"
+  },
+  {
+    "user_question": "Question context: Fortaleza Metro Marquinhos (footballer, born June 1989) Viscount of Cardoso da Silva Em\u00edlio da Silva Jos\u00e9 Graziano da Silva Caf\u00e9 (musician) Marisa Let\u00edcia Lula da Silva Marco da Silva (French footballer) Erika Jayne Marco Da Silva (dancer).                                 Answer my question: Who was born first, Erika Jayne or Marco Da Silva. Correct answer:",
+    "golden_answer": "Erika Jayne"
+  },
+  {
+    "user_question": "Question context: Reading Post St James's Church, Reading York City War Memorial Spalding War Memorial Maiwand Lion Dras War Memorial Manchester Cenotaph Forbury Gardens Devon County War Memorial The Forbury Hotel.                                 Answer my question: When did the English local newspaper, featuring the sculpture and war memorial in the Forbury gardens, change names?. Correct answer:",
+    "golden_answer": "2009"
+  },
+  {
+    "user_question": "Question context: List of islands of Tasmania Ashanti Region Geography of the Philippines List of rulers of the Kingdom of the Isles Aonghus M\u00f3r Kingdom of the Isles Lord of Islay Jaluit Atoll National parks of Taiwan Protected areas of Himachal Pradesh.                                 Answer my question: What is the name of the Isles who were led by Aonghus M\u00f3r and covered a total land area of over 8300 km2?. Correct answer:",
+    "golden_answer": "Kingdom of the Isles"
+  },
+  {
+    "user_question": "Question context: Azra Cargo Records (Canada) Adam and the Ants The Beach Boys The Beatles Marsha Albert Cultural impact of the Beatles Cultural depictions of Elvis Presley Bruce Spizer Christian Death.                                 Answer my question: Who is Bruce Spizer an expert on, known as the most influential act of the rock era?. Correct answer:",
+    "golden_answer": "The Beatles"
+  },
+  {
+    "user_question": "Question context: High Lonesome (Randy Travis album) Steers &amp; Stripes Nothin' 'bout Love Makes Sense Holler Back (Who Says) You Can't Have It All A Lot About Livin' (And a Little 'bout Love) Chattahoochee (song) Tonight I Climbed the Wall She's Got the Rhythm (And I Got the Blues) Alan Jackson albums discography.                                 Answer my question: Which song was behind the third single on the album  \"A Lot About Livin' (And a Little 'bout Love)\" for two weeks on the country charts?. Correct answer:",
+    "golden_answer": "\"We'll Burn That Bridge\""
+  },
+  {
+    "user_question": "Question context: Black 13 Lipstick (1960 film) Cineriz Serafino (film) Commedia all'italiana The Testimony (1946 film) Pietro Germi Ottavio Alessi Divorce Italian Style Path of Hope.                                 Answer my question: What occupation was shared by David Yates and Pietro Germi?. Correct answer:",
+    "golden_answer": "director"
+  },
+  {
+    "user_question": "Question context: History of the Washington Senators (1901\u201360) Baltimore Orioles Boston Red Sox List of Atlanta Braves managers List of Detroit Tigers managers Wayne Garland History of the Cleveland Indians Guelph Royals (baseball) History of the Minnesota Twins Detroit Tigers.                                 Answer my question: Marcus Wayne Garland spent nine seasons with an American professional baseball team that is based in Baltimore, Maryland, and was one of the AMerican League's original eight charter franchises when the league was established in what year?. Correct answer:",
+    "golden_answer": "1901"
+  },
+  {
+    "user_question": "Question context: Antoine Quinquet Trouble light Lewis lamp Kudlik Hefner lamp Argand lamp Glow switch starter Carbon button lamp Kerosene lamp Hollow-cathode lamp.                                 Answer my question: The lamp used in many lighthouses is similiar to this type of lamp patented in 1780 by Aim\u00e9 Argand?. Correct answer:",
+    "golden_answer": "Argand lamp"
+  },
+  {
+    "user_question": "Question context: Sunset Las Palmas Studios Meg Ryan When Harry Met Sally... Dumb and Dumberer: When Harry Met Lloyd When Harry Met Sally... (soundtrack) Gretchen Palmer Nora Ephron Bruno Kirby Connie Sawyer Golden Gate University School of Law.                                 Answer my question: The songs from the sountrack to \"When Harry Met Sally\" are performed by a singer that has had how many top 20 US albums?. Correct answer:",
+    "golden_answer": "seven"
+  },
+  {
+    "user_question": "Question context: Otaara William Henry Nicholls Paracaleana Caladenia Broughtonia sanguinea Broughtonia Calochilus Cypripedioideae Hawkinsara Cattleytonia.                                 Answer my question: Are Broughtonia and Laeliocattleya both orchids?. Correct answer:",
+    "golden_answer": "yes"
+  },
+  {
+    "user_question": "Question context: Tertiary Student Rugby League World Cup 1991 Rugby World Cup 2002 FIFA World Cup 1968\u201369 in Belgian football Orvar Bergmark Ukraine national football team Algeria at the FIFA World Cup Switzerland women's national football team 2014 Cricket World Cup Qualifier 2015 Cricket World Cup opening ceremony.                                 Answer my question: Where was the world cup hosted that Algeria qualified for the first time into the round of 16?. Correct answer:",
+    "golden_answer": "Brazil"
+  },
+  {
+    "user_question": "Question context: Northern Virginia Campaign Battle of Cross Keys Battle of Malvern Hill Battle of Port Republic Savage's Station, Virginia William Dorsey Pender Seven Days Union order of battle Seven Days Battles Seven Days Confederate order of battle Battle of Gaines's Mill.                                 Answer my question: Which was fought earlier in our nation's history, the Seven Days Battles or the Battle of Manila?. Correct answer:",
+    "golden_answer": "The Seven Days Battles"
+  },
+  {
+    "user_question": "Question context: The Lighthouse (Poole) Canford Cliffs Viscount Trenchard Fire Radio Dorset County Council election, 2013 Viscount Wimborne Lush (company) Baron de Mauley List of cider producers in Dorset Poole Methodist Church.                                 Answer my question: What retailer in ABQ Uptown is headquarted in Poole, Dorset, United Kingdom?. Correct answer:",
+    "golden_answer": "Lush Ltd."
+  },
+  {
+    "user_question": "Question context: \u0160NK Radgona Old Trafford, Greater Manchester Trojans Rugby Football Club Trafford Bar tram stop Aquinas Old Collegians Football Club Maxine's Tap Room List of Manchester United F.C. players Ragbi Klub Mornar Bar Gorse Hill Manchester United F.C..                                 Answer my question: What football club plays in the area between the old tool gates: Brook Bar and Trafford bar?. Correct answer:",
+    "golden_answer": "Manchester United"
+  },
+  {
+    "user_question": "Question context: Mary Poppins (film) Mary Poppins (song) My Kind of Town Chim Chim Cher-ee Mary Poppins Returns Mary Poppins Opens the Door I Love to Laugh A Man Has Dreams Step in Time Mary Poppins, Goodbye.                                 Answer my question: The song \"Chim Chim Cher-ee\" can be heard  in the \"Mary Poppins\" scene of a Disney ride that debuted in what year?. Correct answer:",
+    "golden_answer": "1989"
+  },
+  {
+    "user_question": "Question context: Kathy Sullivan (Australian politician) Richard Torbay Peter Blacker Mehmet Tillem Bob Debus Roslyn Dundas Philip Ruddock Michael Atkinson Bronwyn Bishop Carol Martin.                                 Answer my question: Who held the record for the longest service in the Australian Parliament for a woman, and was surpassed by  a former Australian politician who was the 29th Speaker of the House of Representatives?. Correct answer:",
+    "golden_answer": "Kathryn Jean Martin"
+  },
+  {
+    "user_question": "Question context: South Korea 2022 FIFA World Cup bid 2018 and 2022 FIFA World Cup bids Qatar 2022 FIFA World Cup bid Russia 2018 FIFA World Cup bid Indonesia 2022 FIFA World Cup bid Morocco 2026 FIFA World Cup bid Japan 2022 FIFA World Cup bid United States 2022 FIFA World Cup bid Australia 2022 FIFA World Cup bid Bonita Mersiades.                                 Answer my question: Which man who presented the Australia 2022 FIFA World Cup bid was born on October 22, 1930?. Correct answer:",
+    "golden_answer": "Frank Lowy"
+  },
+  {
+    "user_question": "Question context: Lutheran High School (La Verne, California) Faith Lutheran College, Redlands Faith Lutheran High School Mundelein High School Mentor High School Port Charlotte High School Paso Robles High School Faith Lutheran Middle School &amp; High School Vernon Fox Sullivan East High School.                                 Answer my question: What major city is the Faith Lutheran Middle School and High School located by?. Correct answer:",
+    "golden_answer": "Las Vegas"
+  },
+  {
+    "user_question": "Question context: Young Hollywood Awards Jeremy Schoenberg Penske Media Corporation 2013 Young Hollywood Awards Puerto Roc Records 12th Youth in Film Awards Young Adult Library Services Association Maureen Dragone 2014 Young Hollywood Awards 2003 Kids' Choice Awards.                                 Answer my question: What British singer-songwriter hosted the 16th Annual Young Hollywood Awards?. Correct answer:",
+    "golden_answer": "Kelly Lee Osbourne"
+  },
+  {
+    "user_question": "Question context: Winnebago Deal Zachary Throne Double Dagger Didi Beck Dave Meros Tracy Ferrie Walkdown Five Guys in a Really Hot Garage Rodney Slatford Even Steven Levee.                                 Answer my question: Who did the Star and Dagger bass player marry?. Correct answer:",
+    "golden_answer": "Sean Yseult."
+  },
+  {
+    "user_question": "Question context: Center for Pan Asian Community Services, Inc. University of Florida Health Science Center United States Public Health Service Supporting Healthy Marriage Project New Bolton Center Brenda McCowan Ontario Veterinary College Oyewale Tomori Evidence-Based Veterinary Medical Association Western University of Health Sciences.                                 Answer my question: In 2017, what was 3/4th of the organization that also has a Center for Veterinary Medicine as well as part of the U.S. Department of Health and Human Services, spent on?. Correct answer:",
+    "golden_answer": "Prescription Drug User Fee Act"
+  },
+  {
+    "user_question": "Question context: Oryctodromeus Dakotadon Cinizasaurus Supersaurus Fruitadens The Compound (book) Cryptoraptor Comanchesaurus Sphaerotholus Mark Ciardi.                                 Answer my question: Which came out first, Dinosaur or McFarland, USA. Correct answer:",
+    "golden_answer": "Dinosaur"
+  },
+  {
+    "user_question": "Question context: Bishop Sullivan Catholic High School Spalding Catholic High School Bishop Manogue High School Fremont School District 79 Carmel High School (Mundelein, Illinois) St. Petersburg Catholic High School Monroe Catholic High School Kapaun Mt. Carmel Catholic High School Bishop Carroll Catholic High School John S. Burke Catholic High School.                                 Answer my question: Both Bishop Carroll Catholic High School and Kapaun Mt. Carmel Catholic High School are located in which city in Kansas?. Correct answer:",
+    "golden_answer": "Wichita"
+  },
+  {
+    "user_question": "Question context: United States presidential election, 2012 Michigan Democratic primary, 2016 United States presidential election, 1964 United States presidential election, 2020 United States presidential election, 1960 United States presidential election, 1968 United States presidential election, 1892 United States presidential election, 1976 United States presidential election, 2016 2044 election.                                 Answer my question: What was the 58th quadrennial American presidential election held after the 2016 Michigan Democratic primary?. Correct answer:",
+    "golden_answer": "United States presidential election of 2016"
+  },
+  {
+    "user_question": "Question context: Sussex chicken Durotriges AD 43 Roman conquest of Britain Romano-British culture History of Wales History of England List of Roman hoards in Great Britain Corieltauvi Catuvellauni.                                 Answer my question: This Celtic ruler who was born in AD 43 ruled southeastern Britain prior to conquest by which empire?. Correct answer:",
+    "golden_answer": "Roman"
+  },
+  {
+    "user_question": "Question context: The Crooked Hinge Penny Mickelbury Lake District Mysteries He Who Whispers June Thomson Andy Straka Rubislaw quarry Rupaye Dus Karod Sue Grafton C. Hugh Holman.                                 Answer my question: What is the name of the detective novelist parent of the author of '\"Q\" Is for Quarry'?. Correct answer:",
+    "golden_answer": "C. W. Grafton"
+  },
+  {
+    "user_question": "Question context: Steven Bradford John Alario New York's 2nd State Senate district Nesting (voting districts) California State Senate New York's 4th State Senate district New York's 1st State Senate district Hawaii Senate Andrea Stewart-Cousins New York's 3rd State Senate district.                                 Answer my question: What is the birthplace of the Senator who represents the first of 62 districts in the State Senate?. Correct answer:",
+    "golden_answer": "Brooklyn, New York"
+  },
+  {
+    "user_question": "Question context: Covington, Tennessee Memphis Hustle Marion, Arkansas Millington, Tennessee Ellenbrook, Western Australia West Memphis, Arkansas Memphis metropolitan area Lakeland, Tennessee Olive Branch, Mississippi Southaven, Mississippi.                                 Answer my question: The Memphis Hustle are based in a suburb of a city with a population of what in 2010?. Correct answer:",
+    "golden_answer": "48,982"
+  },
+  {
+    "user_question": "Question context: Pasek and Paul City of Stars A Christmas Story: The Musical Another Day of Sun List of accolades received by La La Land Audition (The Fools Who Dream) David and Sandy Reynolds-Wasco La La Land (soundtrack) La La Land (Demi Lovato song) Mary Zophres.                                 Answer my question: Which songwriting duo composed music for \"La La Land\", and created lyrics for \"A Christmas Story: The Musical\"? . Correct answer:",
+    "golden_answer": "Pasek & Paul"
+  },
+  {
+    "user_question": "Question context: Bucketty Hunter Institute of TAFE Gillieston Heights Niagara Park, New South Wales Shelly Beach (Manly) Mount View, New South Wales Grahamstown Dam Yanco Agricultural High School Unincorporated Far West Region Shelly Beach, New South Wales.                                 Answer my question: Which of the city at the south of Shelly Beach, New South Wales is a local government area in the Hunter region of New South Wales, Australia?. Correct answer:",
+    "golden_answer": "City of Newcastle"
+  },
+  {
+    "user_question": "Question context: Bamboo Ma\u00f1alac The Voice of the Philippines No Water, No Moon Rivermaya The Voice Kids (Philippine TV series) Bamboo (band) Kakoy Legaspi The Voice Teens (Philippines season 1) The Voice Teens (Philippine TV series) As the Music Plays.                                 Answer my question: Are Bamboo Ma\u00f1alac and Danny Jones both musicians?. Correct answer:",
+    "golden_answer": "yes"
+  },
+  {
+    "user_question": "Question context: Amistad Dam Port of Entry Karaboro languages Remington Model 51 Darayim District Albertina Marovoay Hanna Varis Gwangjang Market United Negro College Fund Pakistan Air Force.                                 Answer my question: Works by Hanna Leena Kristiina Varis are part of a collection in a museum that houses approximately 65,000 what?. Correct answer:",
+    "golden_answer": "drawings"
+  },
+  {
+    "user_question": "Question context: Leda (river) Proto-Norse language Suorva Frankish language Old Saxon Afrikaans Leer Dutch language English language German language.                                 Answer my question: When was the Western Germanic language spoken from which the small settlement situated on the river Leda opposite Leer derives its name?. Correct answer:",
+    "golden_answer": "between the 8th and 16th centuries"
+  },
+  {
+    "user_question": "Question context: Chawalit Kamutchati William Bonfield Paul M\u00e9fano Norman Coburn Valentina Tereshkova Australian referendum, 1937 Arild Nyquist Vatroslav Ro\u017ei\u0107 Robin Bailie Bob Clifford (footballer).                                 Answer my question: Born on 6 March 1937, this man was also a citizen of the United Kingdom.. Correct answer:",
+    "golden_answer": "Alistair Grant"
+  },
+  {
+    "user_question": "Question context: Lung Fu Shan Country Park Hatton Castle, Angus Hatton Castle, Aberdeenshire Angus cattle Hatton Hill Hutton Castle Hatton, Warwickshire Auchterhouse Castle Hatton baronets Broughty Castle.                                 Answer my question: What country does Hatton Hill and Hatton Castle, Angus have in common?. Correct answer:",
+    "golden_answer": "Scotland"
+  },
+  {
+    "user_question": "Question context: Nerdist Industries Course of the Force Chloe Dykstra Nerdist News Bobby Mehta The Nerdist Podcast The Drop-In (podcast) Chris Hardwick Jessica Chobot Maltin on Movies.                                 Answer my question: What podcast was the cheif executive officer of Nerdist Industries a guest on?. Correct answer:",
+    "golden_answer": "Comedy Film Nerds"
+  },
+  {
+    "user_question": "Question context: Randall Cunningham II Ken Rose (gridiron football) Nevada Union High School Vashti Cunningham Luke Urban List of multi-sport athletes Guo Jie David Masur Adam Thielen Randall Cunningham.                                 Answer my question: Randall Cunningham II was a multi-sport athlete at the high school located in what Nevada city?. Correct answer:",
+    "golden_answer": "Summerlin"
+  },
+  {
+    "user_question": "Question context: Gem Archer Imagine (John Lennon song) 5:55 Sharon Gannon We Laughed Love Songs: A Compilation... Old and New No Plan (EP) List of songs recorded by Syd Barrett Who Can See It See Yourself.                                 Answer my question: Which English musician is known for both the songs \"See Yourself\" and \"Withing You Without You\"?. Correct answer:",
+    "golden_answer": "George Harrison"
+  },
+  {
+    "user_question": "Question context: Fred Doherty Travis Richards 20th National Hockey League All-Star Game National Hockey League All-Star Game 57th National Hockey League All-Star Game 60th National Hockey League All-Star Game NHL All-Star Skills Competition List of Stanley Cup champions 44th National Hockey League All-Star Game Ryan Johansen.                                 Answer my question: Which professional ice hockey position does the Captain of the National Hockey League All-Star Game \"Away Team\" play?. Correct answer:",
+    "golden_answer": "Canadian professional ice hockey centre"
+  },
+  {
+    "user_question": "Question context: Rebel Highway Sal Mineo Rebel Without a Pause Jim Backus Corey Allen My Teenage Daughter Casey Braxton Stewart Stern Jack Grinnage The Cheers.                                 Answer my question: What year did the series on CBS, starring the actor who known for his role in \"Rebel Without a Cause,\" air?. Correct answer:",
+    "golden_answer": "1952"
+  },
+  {
+    "user_question": "Question context: Avatar: The Last Airbender (season 1) Bolin (The Legend of Korra) Avatar: The Last Airbender (season 2) Kuvira Zaheer The Legend of Korra List of The Legend of Korra episodes Avatar: The Last Airbender (season 3) Iroh List of Avatar: The Last Airbender episodes.                                 Answer my question: What season was the character introduced that becomes the main antagonist in the  following season, from the animated television series created by Bryan Konietzko and Michael Dante DiMartino as a sequel to \"\", which aired from 2005 to 2008? . Correct answer:",
+    "golden_answer": "third"
+  },
+  {
+    "user_question": "Question context: List of Dexter episodes The British Invasion (Dexter) Dexter (TV series) Michael C. Hall The Damage a Man Can Do Vince Masuka Sage Kirkpatrick Darkly Dreaming Dexter It's Alive! (Dexter) Hello, Dexter Morgan.                                 Answer my question: Who were the directors of the 2009 American science fiction film starring the actor who played Dexter Morgan in the Showtime TV Network series \"Dexter\"?. Correct answer:",
+    "golden_answer": "Mark Neveldine and Brian Taylor"
+  },
+  {
+    "user_question": "Question context: Lance Krall Matt Kennedy Gould List of The Joe Schmo Show episodes Stone Stanley Entertainment Rhett Reese Gretchen Palmer Robert Belushi Free Radio (TV series) The Joe Schmo Show Ralph Garman.                                 Answer my question: Which travel parody series featured American actor, comedian, and radio host best known as the host of \"The Joe Schmo Show\"?. Correct answer:",
+    "golden_answer": "Hidden America with Jonah Ray"
+  },
+  {
+    "user_question": "Question context: Take 21 Three are Three The Importance of Being Icelandic Jackie Lou Blanco Poetical Refugee Music composition and composers in Pristina Film laboratory Buddy film The Five Obstructions Parody film.                                 Answer my question: Do The Importance of Being Icelandic and The Five Obstructions belong to different film genres ?. Correct answer:",
+    "golden_answer": "no"
+  },
+  {
+    "user_question": "Question context: Party switching in the United States Hungarian Communist Party Australian federal election, 1972 Swedish general election, 1982 Tefik Mborja United Bermuda Party Madras Legislative Assembly election, 1967 Confederation of Mexican Workers Bal'arab bin Himyar People's Socialist Republic of Albania.                                 Answer my question: Tefik Selim Mborja was a part of a party that held power in Albania until what year? . Correct answer:",
+    "golden_answer": "1943"
+  },
+  {
+    "user_question": "Question context: Magnolia Bowl Oregon Ducks football Wayne Walker 1983 Oregon State vs. Oregon football game Battle of the Blue Civil War (college football game) The Rivalry (Lehigh\u2013Lafayette) Army\u2013Navy Game Battle for the Bell Textile Bowl.                                 Answer my question: Joe Walker played for which team that ends their regular season with the Civil War rivalry game?. Correct answer:",
+    "golden_answer": "Oregon Ducks football"
+  },
+  {
+    "user_question": "Question context: Good Morning, Miami Boston Common (TV series) David Kohan Will &amp; Grace Partners (2012 TV series) James Carroll (actor) Pilot (Will &amp; Grace) Marry Me a Little, Marry Me a Little More Four Kings The Stones (TV series).                                 Answer my question: What station broadcast the episode \"Marry Me a Little, Marry Me a Little More\" , of the series created by Max Mutchnick and David Kohan?. Correct answer:",
+    "golden_answer": "National Broadcasting Company"
+  },
+  {
+    "user_question": "Question context: Jean Portante Don Bousquet Latresne Vaughan Hart Ghulam Nabi Firaq John Hirst (historian) Blackstone River and Canal Heritage State Park Georges-Henri Bousquet Sally Gibson Armando Mook.                                 Answer my question: Georges-Henri Bousquet translated the work of a historian who is of what heritage?. Correct answer:",
+    "golden_answer": "North African Arab"
+  },
+  {
+    "user_question": "Question context: Compilers: Principles, Techniques, and Tools David H. Bailey Nuria Oliver Franz Josef Och Sethi\u2013Ullman algorithm Albanian University in Berat Ravi Sethi Bell Labs Annie Easley Pharma Medica.                                 Answer my question: In which city are the headquarters of the American research and scientific development company where Ravi Sethi worked as computer scientist located?. Correct answer:",
+    "golden_answer": "Murray Hill"
+  },
+  {
+    "user_question": "Question context: Asthma-related microbes Severe acute respiratory syndrome Yi Guan Irish Thoracic Society Chronic Respiratory Disease Feline viral rhinotracheitis Aspirin-induced asthma Journal of Thoracic Disease Pulmonary rehabilitation SARS (disambiguation).                                 Answer my question: What is the full name of the viral respiratory disease in which Yi Guan's research helped to prevent the outbreak of?. Correct answer:",
+    "golden_answer": "severe acute respiratory syndrome"
+  },
+  {
+    "user_question": "Question context: Judith Ortiz Cofer Winfred Blevins Nebula Award for Best Novel Jay Cronley Melissa Fay Greene Dim Gray Bar Press New York State Writers Hall of Fame Franci Cerar Blinkey Horn Wendell Berry.                                 Answer my question: Which Kentucky Writers Hall of Fame author has had works published by Dim Gray Bar Press?. Correct answer:",
+    "golden_answer": "Wendell Berry"
+  },
+  {
+    "user_question": "Question context: Inteha (2003 film) Udanchhoo Rajneesh Duggal 1920 (film series) 1920 (film) Phhir Be Careful (film) Ankahee (2006 film) Spark (2014 film) Anhoniyon Ka Andhera.                                 Answer my question: What director worked with Vikram Bhatt on a film starring actors Rajneesh Duggal and Adah Sharma?. Correct answer:",
+    "golden_answer": "Tinu Suresh Desai"
+  },
+  {
+    "user_question": "Question context: Hyrum W. Smith RetailMeNot Methode Electronics Robert Smith (Illinois politician) Equinix Henkel Namsung electronics Teleperformance Stevanato Group Corey Smith (artist).                                 Answer my question:  Robert Smith founded the multinational company headquartered in what city?. Correct answer:",
+    "golden_answer": "Golden Valley, Minnesota,"
+  },
+  {
+    "user_question": "Question context: Duty to settle Fraley v. Facebook, Inc. Nilmoni Tagore Al Utouriya Damian Wayne Kasia Al Thani Par\u00e1s, Nuevo Le\u00f3n List of largest pharmaceutical settlements Tell El Sakan Mana Al Otaiba.                                 Answer my question: What amount was the settlement that the character from the Son of al Quada got in 2017?. Correct answer:",
+    "golden_answer": "$10.5 million"
+  },
+  {
+    "user_question": "Question context: 1999 Odisha cyclone Cyclone Gonu Cyclone Donna Cyclone Anne Cyclone Esau Cyclone Kesiny Cyclone Hondo 2002\u201303 Australian region cyclone season 2010\u201311 South Pacific cyclone season 2011\u201312 South Pacific cyclone season.                                 Answer my question: Considered the strongest recorded tropical cyclone, which cyclone had a film made about it in 2007?. Correct answer:",
+    "golden_answer": "1999 Odisha cyclone"
+  }
+]

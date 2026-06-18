@@ -1,5 +1,5 @@
 params:
-  huggingface_link: "allenai/OLMo-2-0425-1B"
+  huggingface_link: "allenai/OLMo-2-0425-1B-Instruct"
   huggingface_link_pruned: "nothingisenough/olmo2-sparsegpt-05" # shortcut for prune stage, else "false"
   model_name: "olmo2"
 
