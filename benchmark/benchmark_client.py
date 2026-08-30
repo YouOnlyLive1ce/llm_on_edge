@@ -24,7 +24,6 @@ class BenchLLMClient:
         # self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
         self.results={
                         'answers':[],
-                        'accuracy':[],
                         'ppl':[],
                         'flips':[],
                         'prompt_per_second':[],
@@ -47,7 +46,7 @@ class BenchLLMClient:
         requests.post(f'{self.server_url}/server_setup',headers=headers,json=data)
         self.model_id=None
         self.server_type=None
-        self.results={'accuracy':[],'ppl':[],'flips':[],'prompt_per_second':[],'predicted_per_second':[],'answers':[]}
+        self.results={'ppl':[],'flips':[],'prompt_per_second':[],'predicted_per_second':[],'answers':[]}
         
     def generate_questions(self):
         golden_dataset=[]
@@ -67,7 +66,7 @@ class BenchLLMClient:
         # call imported function
         ...
     
-    def bench_accuracy(self):
+    def bench_speed(self):
         headers = {"Content-Type": "application/json"}
 
         for i in range(self.amount_samples):
@@ -108,7 +107,6 @@ class BenchLLMClient:
             logger.info(response)
             answer = response['chat']['content']
             self.results['answers'].append(answer)
-            # self.results['accuracy'].append(any(word in answer.split() for word in row['answer'].split()))
             self.results['prompt_per_second'].append(response['prompt_per_second'])
             self.results['predicted_per_second'].append(response['predicted_per_second'])
     
@@ -175,7 +173,7 @@ class BenchLLMClient:
         """
         candidate_answers: List of predicted answer strings
         golden_df: DataFrame with 'golden_answer' column
-        metric: 'precision', 'recall', or 'f1'
+        metric: 'precision', 'recall', 'f1', or 'exact_match'
         """
         
         scores = []
@@ -201,8 +199,14 @@ class BenchLLMClient:
                 precision = len(intersection) / len(cand_set) if cand_set else 0
                 recall = len(intersection) / len(gold_set) if gold_set else 0
                 score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+            elif metric == 'exact_match':
+                # Exact match: 1.0 if candidate equals golden answer, else 0.0
+                # Using the original strings (before preprocessing) for exact match
+                cand_orig = candidate_answers[i].strip()
+                gold_orig = golden_df["golden_answer"][i].strip()
+                score = 1.0 if cand_orig == gold_orig else 0.0
             else:
-                raise ValueError("metric must be 'precision', 'recall', or 'f1'")
+                raise ValueError("metric must be 'precision', 'recall', 'f1', or 'exact_match'")
             
             scores.append(score)
         
@@ -211,6 +215,7 @@ class BenchLLMClient:
     def calc_categories(self, candidate_answers, golden_df):
         categories = []
         f1s=self.calc_scores(candidate_answers,golden_df,'f1')
+        recalls=self.calc_scores(candidate_answers,golden_df,'recall')
         for i in range(len(candidate_answers)):
             cand_set = self.preprocess(candidate_answers[i])
             gold_set = self.preprocess(golden_df["golden_answer"][i])
@@ -228,9 +233,9 @@ class BenchLLMClient:
                 category="d_question_gen"
             elif len(intersection) / len(gold_set)==0:
                 category="d_incorrect"
-            elif f1s[i]>0.1:
+            elif recalls[i]>=0.6: # TODO: experiments
                 category="d_correct"
-            elif f1s[i]<0.1:
+            elif recalls[i]<0.6:
                 category="d_no_final"
             categories.append(category)
             
@@ -239,6 +244,10 @@ class BenchLLMClient:
     def compare_results(self, path_to_jsons, base_model_file_name, golden_path="./golden_dataset.json"):
         import pandas as pd
         from pathlib import Path
+        def mean_std(series: pd.Series):
+            if series is None or len(series) == 0:
+                return "NaN"
+            return series.mean(), series.std()
         
         json_files = [str(path) for path in Path(path_to_jsons).rglob("*.jsona")]
         # Find index of the base model
@@ -255,6 +264,8 @@ class BenchLLMClient:
         precisions=[]
         recalls=[]
         f1s=[]
+        ems=[]
+        ppls=[]
         determenistic_categories=[]
         n=len(golden_df["golden_answer"])
         for file in json_files:
@@ -272,6 +283,8 @@ class BenchLLMClient:
             precisions.append(self.calc_scores(candidate_answers,golden_df,'precision'))
             recalls.append(self.calc_scores(candidate_answers,golden_df,'recall'))
             f1s.append(self.calc_scores(candidate_answers,golden_df,'f1'))
+            ems.append(self.calc_scores(candidate_answers,golden_df,'exact_match'))
+            ppls.append(mean_std(df['ppl'])[0])
             determenistic_categories.append(self.calc_categories(candidate_answers,golden_df))
             dfs.append(df)
 
@@ -279,12 +292,14 @@ class BenchLLMClient:
         aggregated_metrics_analysis_df=[]
         for i in range(len(json_files)):
             df = dfs[i]
-            raw_metrics_df=pd.concat([pd.DataFrame(list(zip(precisions[i],recalls[i],f1s[i],determenistic_categories[i],
+            raw_metrics_df=pd.concat([pd.DataFrame(list(zip(precisions[i],recalls[i],f1s[i],ems[i],determenistic_categories[i],
                                     [self.preprocess(strr) for strr in df['answers']],
                                     [self.preprocess(cand_strr).intersection(self.preprocess(gold_strr)) for cand_strr,gold_strr in \
                                         zip(df['answers'],golden_df['golden_answer'])]
                                     )),
-                                    columns=["precision", "recall", "f1", "d_category", "normalized_answer", "extracted answer"]),
+                                    columns=["precision", "recall", "f1", "em", "d_category", "normalized_answer", "extracted answer"]),
+                                    pd.DataFrame([f"https://huggingface.co/nothingisenough/{Path(json_files[i]).stem}"]*n,
+                                    columns=["model_hf_url"]),
                                     df,
                                     golden_df
                                     ],
@@ -293,24 +308,39 @@ class BenchLLMClient:
             # extensive results on which figures in paper are build
             raw_metrics_df.to_json(f"../../out/raw_results/{Path(json_files[i]).name}",orient='records',indent=2)
             
-            def mean_std(series):
-                if series is None or len(series) == 0:
-                    return "NaN"
-                return f"{series.mean():.2f}+-{series.std():.2f}"
-
-            ppl_str = mean_std(df['ppl'])
-            prefill_str = mean_std(df['prompt_per_second'])
-            decode_str = mean_std(df['predicted_per_second'])
+            ppl_str = f"{mean_std(df['ppl'])[0]:.2f}+-{mean_std(df['ppl'])[1]:.2f}"
+            prefill_str = f"{mean_std(df['prompt_per_second'])[0]:.2f}+-{mean_std(df['prompt_per_second'])[1]:.2f}"
+            decode_str = f"{mean_std(df['predicted_per_second'])[0]:.2f}+-{mean_std(df['predicted_per_second'])[1]:.2f}"
             
+            # determenistic categories
+            d_base_category = pd.Series(determenistic_categories[base_model_idx])
+            d_curr_category = raw_metrics_df['d_category']
+            d_base_transitions=pd.crosstab(d_base_category, d_curr_category)
+            # mcnemar compared to base model
+            # treatment_c_curr_c=treatment_transitions.get("CORRECT").get("CORRECT").item()
+            # treatment_c_curr_other=(curr_no_prune_category=="CORRECT").sum()-treatment_c_curr_c
+            # treatment_wrong_curr_wrong=np.trace(treatment_transitions)-treatment_c_curr_c
+            # treatment_wrong_curr_other=n-treatment_c_curr_c-treatment_wrong_curr_wrong-treatment_c_curr_other
+            d_base_c_curr_c=d_base_transitions.get("d_correct").get("d_correct").item()
+            d_base_c_curr_other=(d_base_category=="d_correct").sum()-d_base_c_curr_c
+            common_labels = d_base_transitions.index.intersection(d_base_transitions.columns)
+            d_base_trace = sum(d_base_transitions.loc[label, label] for label in common_labels)
+            d_base_wrong_curr_wrong=d_base_trace-d_base_c_curr_c
+            d_base_wrong_curr_other=n-(d_base_category=="d_correct").sum()-d_base_wrong_curr_wrong
+
+            # semantic categories
             base_category = dfs[base_model_idx]['category']
             curr_category = df['category']
-            
             base_transitions=pd.crosstab(base_category, curr_category, colnames=["category"])
             # mcnemar compared to base model
-            base_a=base_transitions.get("CORRECT").get("CORRECT").item()
-            base_b=base_transitions.get("CORRECT").get("INCORRECT").item()
-            base_c=base_transitions.get("INCORRECT").get("CORRECT").item()
-            base_d=base_transitions.get("INCORRECT").get("INCORRECT").item()
+            base_c_curr_c=base_transitions.get("CORRECT").get("CORRECT").item()
+            base_c_curr_other=(base_category=="CORRECT").sum()-base_c_curr_c
+            common_labels = base_transitions.index.intersection(base_transitions.columns)
+            base_trace = sum(base_transitions.loc[label, label] for label in common_labels)
+            base_wrong_curr_wrong=base_trace-base_c_curr_c
+            base_wrong_curr_other=n-(base_category=="CORRECT").sum()-base_wrong_curr_wrong
+            base_c_curr_ic=base_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
+            base_ic_curr_c=base_transitions.get("INCORRECT",pd.Series([0])).get("CORRECT",pd.Series([0])).item()
             
             # mcnemar comparison of current treatment (base->pruning->quant) vs no treatment (base->quant)
             treatment_p_val=None
@@ -320,10 +350,14 @@ class BenchLLMClient:
             treatment_delta_recall=None
             curr_no_prune_category=None
             pure_quantized_idx=None
-            treatment_a=(df['category']=="CORRECT").sum()
-            treatment_b=0
-            treatment_c=0
-            treatment_d=(df['category']=="INCORRECT").sum()
+            treatment_c_curr_c=(df['category']=="CORRECT").sum()
+            treatment_c_curr_other=0
+            treatment_wrong_curr_other=0
+            treatment_wrong_curr_wrong=(df['category']=="INCORRECT").sum()
+            treatment_ppl_diff=0
+            treatment_trace=0
+            # treatment_ic_curr_c=0
+            # treatment_c_curr_ic=0
             if "quantized" in json_files[i] and ("sparsegpt" in json_files[i] or "wanda" in json_files[i]):
                 # corresponding no treatment experiment
                 pure_quantized=json_files[i].replace("unstructured_","").replace("sparsegpt_","").replace("wanda_","").replace("0.2_","").replace("0.5_","")
@@ -336,11 +370,17 @@ class BenchLLMClient:
                 treatment_transitions=pd.crosstab(curr_no_prune_category,curr_category, colnames=["category"])
                 # mcnemar compared treatment to no treatment
                 print("comparing treatment model",json_files[i]," to no treatment (no pruning) model",json_files[pure_quantized_idx])
-                treatment_a=treatment_transitions.get("CORRECT").get("CORRECT").item()
-                treatment_b=treatment_transitions.get("CORRECT").get("INCORRECT").item()
-                treatment_c=treatment_transitions.get("INCORRECT").get("CORRECT").item()
-                treatment_d=treatment_transitions.get("INCORRECT").get("INCORRECT").item()
-                treatment_p_val=1 - scipy.stats.chi2.cdf((treatment_b-treatment_c)**2 / (treatment_b+treatment_c), 1)
+                treatment_c_curr_c=treatment_transitions.get("CORRECT").get("CORRECT").item()
+                treatment_c_curr_other=(curr_no_prune_category=="CORRECT").sum()-treatment_c_curr_c
+                common_labels = treatment_transitions.index.intersection(treatment_transitions.columns)
+                treatment_trace = sum(treatment_transitions.loc[label, label] for label in common_labels)
+                treatment_wrong_curr_wrong=treatment_trace-treatment_c_curr_c
+                treatment_wrong_curr_other=n-(curr_no_prune_category=="CORRECT").sum()-treatment_wrong_curr_wrong
+                # treatment_c_curr_ic=treatment_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
+                # treatment_ic_curr_c=treatment_transitions.get("INCORRRECT",pd.Series([0])).get("CORRECT",pd.Series([0])).item()
+                
+                treatment_p_val=1 - scipy.stats.chi2.cdf((treatment_c_curr_other-treatment_wrong_curr_other)**2 / (treatment_c_curr_other+treatment_wrong_curr_other), 1)
+                treatment_ppl_diff=ppls[i]-ppls[pure_quantized_idx]
                 
                 # precision ci compared to no treatment model
                 tp1=sum(precisions[pure_quantized_idx])/n
@@ -368,6 +408,7 @@ class BenchLLMClient:
                 "precision":sum(precisions[i])/n,
                 "recall":sum(recalls[i])/n,
                 "f1":sum(f1s[i])/n,
+                "em":sum(ems[i])/n,
                 "s_correct":(df['category']=="CORRECT").sum()/n,
                 "s_incorrect":(df['category']=="INCORRECT").sum()/n,
                 "s_malformed":(df['category']=="MALFORMED").sum()/n,
@@ -397,7 +438,7 @@ class BenchLLMClient:
             base_n2=len(golden_df) # precision was calculated for every response
             base_std_precision=(base_p1*(1-base_p1)/base_n1 + base_p2*(1-base_p2)/base_n2)**0.5
             
-            base_p_val=1 - scipy.stats.chi2.cdf((base_b-base_c)**2 / (base_b+base_c), 1) if base_b+base_c>0 else 1
+            base_p_val=1 - scipy.stats.chi2.cdf((base_wrong_curr_other-base_c_curr_other)**2 / (base_wrong_curr_other+base_c_curr_other), 1) if base_ic_curr_c+base_c_curr_ic>0 else 1
             
             # recall ci compared to base model
             base_r1=sum(recalls[base_model_idx])/n
@@ -409,35 +450,42 @@ class BenchLLMClient:
             aggregated_metrics_analysis_df.append({
                 "name":name,
                 
-                "base cor->cor": base_a, #base to optimized
-                "base cor->incor":base_c,#base to optimized
-                "base incor->cor":base_b,
-                "base incor->incor":base_d,
-                "base instability":base_c+base_b,
-                "base delta s_accuracy": (curr_category=="CORRECT").sum()/n - (base_category=="CORRECT").sum()/n,
-                "base delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[base_model_idx].count("d_correct")/n,
-                "base delta precision":base_p2-base_p1,
-                "base delta recall":base_r2-base_r1,
-                "base ci precision": f"{base_p2 - 1.96 * base_std_precision:.2f}..{
-                                   base_p2 + 1.96 * base_std_precision:.2f}",
-                "base ci recall":f"{base_r2 - 1.96 * base_std_recall:.2f}..{
-                                   base_r2 + 1.96 * base_std_recall:.2f}",
-                "base mcnemar p": str(f"{base_p_val:.2f}") if base_p_val<0.1 else ">", # represents that base and optimized distributions differ
+                "base ppl delta":ppls[i]-ppls[base_model_idx],
+                "d base cor->cor": d_base_c_curr_c, #base to optimized
+                "d base cor->other":d_base_c_curr_other,#base to optimized
+                "d base wrong->other":d_base_wrong_curr_other,
+                "d base wrong->wrong":d_base_wrong_curr_wrong,
                 
-                "treatment cor->cor": treatment_a, #base to optimized
-                "treatment cor->incor":treatment_c,#base to optimized
-                "treatment incor->cor":treatment_b,
-                "treatment incor->incor":treatment_d,
-                "treatment instability":treatment_b+treatment_c,
-                "treatment delta s_accuracy":(curr_category=="CORRECT").sum()/n - (curr_no_prune_category=="CORRECT").sum()/n if curr_no_prune_category is not None else "-",
-                "treatment delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[pure_quantized_idx].count("d_correct")/n if pure_quantized_idx else "-",
-                "treatment delta precision":treatment_delta_precision if treatment_delta_precision else "-",
-                "treatment delta recall":treatment_delta_recall if treatment_delta_recall else "-",
-                "treatment ci precision": f"{base_p2 - 1.96 * treatment_std_precision:.2f}..{
+                "s base cor->cor": base_c_curr_c, #base to optimized
+                "s base cor->other":base_c_curr_other,#base to optimized
+                "s base incor->other":base_wrong_curr_other,
+                "s base incor->incor":base_wrong_curr_wrong,
+                "s base instability":n-base_trace,
+                "s base delta s_accuracy": (curr_category=="CORRECT").sum()/n - (base_category=="CORRECT").sum()/n,
+                "s base delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[base_model_idx].count("d_correct")/n,
+                "s base delta precision":base_p2-base_p1,
+                "s base delta recall":base_r2-base_r1,
+                "s base ci precision": f"{base_p2 - 1.96 * base_std_precision:.2f}..{
+                                   base_p2 + 1.96 * base_std_precision:.2f}",
+                "s base ci recall":f"{base_r2 - 1.96 * base_std_recall:.2f}..{
+                                   base_r2 + 1.96 * base_std_recall:.2f}",
+                "s base mcnemar p": str(f"{base_p_val:.2f}") if base_p_val<0.1 else ">", # represents that base and optimized distributions differ
+                
+                "treatment ppl delta":treatment_ppl_diff,
+                "s treatment cor->cor": treatment_c_curr_c, #base to optimized
+                "s treatment cor->other":treatment_c_curr_other,#base to optimized
+                "s treatment wrong->other":treatment_wrong_curr_other,
+                "s treatment wrong->wrong":treatment_wrong_curr_wrong,
+                "s treatment instability":n-treatment_trace,
+                "s treatment delta s_accuracy":(curr_category=="CORRECT").sum()/n - (curr_no_prune_category=="CORRECT").sum()/n if curr_no_prune_category is not None else "-",
+                "s treatment delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[pure_quantized_idx].count("d_correct")/n if pure_quantized_idx else "-",
+                "s treatment delta precision":treatment_delta_precision if treatment_delta_precision else "-",
+                "s treatment delta recall":treatment_delta_recall if treatment_delta_recall else "-",
+                "s treatment ci precision": f"{base_p2 - 1.96 * treatment_std_precision:.2f}..{
                                    base_p2 + 1.96 * treatment_std_precision:.2f}" if treatment_std_precision else "-",
-                "treatment ci recall": f"{base_r2 - 1.96 * treatment_std_recall:.2f}..{
+                "s treatment ci recall": f"{base_r2 - 1.96 * treatment_std_recall:.2f}..{
                                    base_r2 + 1.96 * treatment_std_recall:.2f}" if treatment_std_recall else "-",
-                "treatment mcnemar p": str(f"{treatment_p_val:.2f}") if treatment_p_val else "-" # represents that pruned and pruned->quantized distributions differ
+                "s treatment mcnemar p": str(f"{treatment_p_val:.2f}") if treatment_p_val else "-" # represents that pruned and pruned->quantized distributions differ
             })
 
         aggregated_metrics_df = pd.DataFrame(aggregated_metrics_df).sort_values(by="name",key=lambda x: x.str[::-1]).reset_index(drop=True)
@@ -479,7 +527,7 @@ class BenchLLMClient:
         
         return tmp_df.corr()
     
-    def plot_tradeoffs(self, x, *ys, group_labels = None, names=None, colors=None, titles=None, xlabel='base instability', figsize=(16, 4), ncols=4):
+    def plot_tradeoffs(self, x, *ys, group_labels = None, names=None, colors=None, titles=None, xlabel='base instability', figsize=(20, 4), ncols=4):
         import matplotlib.pyplot as plt
         import numpy as np
         from matplotlib.lines import Line2D
@@ -527,15 +575,24 @@ if __name__ =="__main__":
     from pathlib import Path
     
     parser = argparse.ArgumentParser(description="Execute the model optimization pipeline")
-    parser.add_argument("--models-path", default="./out/olmo2", help="where ggufs and gptqmodels are")
-    parser.add_argument("--results-path", default="./out/olmo2/benchmark_results", help="where results are")
+    parser.add_argument("--models-path", default="./out/smollm2", help="where ggufs and gptqmodels are")
+    parser.add_argument("--results-path", default="./out/smollm2/benchmark_results", help="where results are")
     parser.add_argument("--server-url",default="http://localhost:8080")
     args = parser.parse_args()
     
     folder_path = Path(args.models_path)
     # run all ggufs (original_q16, pruned_q16, pruned_qX) and /quantized/model_{gptq|awq}X.safetensors
     
-    models = [str(path.parent) for path in folder_path.rglob("quantize_config.json")] + [str(path) for path in folder_path.rglob("*.gguf")]
+    # models = [str(path.parent) for path in folder_path.rglob("quantize_config.json")] + [str(path) for path in folder_path.rglob("*.gguf")]
+    models=["./out/smollm2/pruned/unstructured/sparsegpt/0.2/smollm2_unstructured_sparsegpt_0.2_q16.gguf",
+            "./out/smollm2/pruned/unstructured/sparsegpt/0.5/smollm2_unstructured_sparsegpt_0.5_q16.gguf",
+            "./out/smollm2/pruned/unstructured/wanda/0.2/smollm2_unstructured_wanda_0.2_q16.gguf",
+            "./out/smollm2/pruned/unstructured/wanda/0.5/smollm2_unstructured_wanda_0.5_q16.gguf",
+            # "./out/olmo2/pruned/unstructured/sparsegpt/0.2/olmo2_unstructured_sparsegpt_0.2_q16.gguf",
+            # "./out/olmo2/pruned/unstructured/sparsegpt/0.5/olmo2_unstructured_sparsegpt_0.5_q16.gguf",
+            # "./out/olmo2/pruned/unstructured/wanda/0.2/olmo2_unstructured_wanda_0.2_q16.gguf",
+            # "./out/olmo2/pruned/unstructured/wanda/0.5/olmo2_unstructured_wanda_0.5_q16.gguf",
+            ]
     logger.info(f"models found: {models}")
     # models also can be hf link for remote server
     
@@ -543,8 +600,8 @@ if __name__ =="__main__":
     for model in models:
         client.start_server(model)
         time.sleep(400) # waiting is performed ob server side
-        client.bench_accuracy()
-        # client.bench_perplexity()
+        client.bench_speed()
+        client.bench_perplexity()
         client.save_to_file(f'./{args.results_path}/{client.model_id}')
         client.stop_server()
         time.sleep(120)

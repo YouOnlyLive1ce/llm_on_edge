@@ -46,7 +46,6 @@ class BenchLLMServer:
         self.gptqmodel=None # need for measuring gptqmodel_speed
         
         self.results={
-                        'accuracy':[],
                         'ppl':[],
                         'flips':[],
                         'prompt_per_second':[],
