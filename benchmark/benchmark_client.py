@@ -343,7 +343,7 @@ class BenchLLMClient:
             base_ic_curr_c=base_transitions.get("INCORRECT",pd.Series([0])).get("CORRECT",pd.Series([0])).item()
             
             # mcnemar comparison of current treatment (base->pruning->quant) vs no treatment (base->quant)
-            treatment_p_val=None
+            treatment_p_val=1
             treatment_std_precision=None
             treatment_std_recall=None
             treatment_delta_precision=None
@@ -438,7 +438,7 @@ class BenchLLMClient:
             base_n2=len(golden_df) # precision was calculated for every response
             base_std_precision=(base_p1*(1-base_p1)/base_n1 + base_p2*(1-base_p2)/base_n2)**0.5
             
-            base_p_val=1 - scipy.stats.chi2.cdf((base_wrong_curr_other-base_c_curr_other)**2 / (base_wrong_curr_other+base_c_curr_other), 1) if base_ic_curr_c+base_c_curr_ic>0 else 1
+            base_p_val=1 - scipy.stats.chi2.cdf((base_wrong_curr_other-base_c_curr_other)**2 / (base_wrong_curr_other+base_c_curr_other), 1) if base_wrong_curr_other+base_c_curr_other>0 else 1
             
             # recall ci compared to base model
             base_r1=sum(recalls[base_model_idx])/n
@@ -458,8 +458,8 @@ class BenchLLMClient:
                 
                 "s base cor->cor": base_c_curr_c, #base to optimized
                 "s base cor->other":base_c_curr_other,#base to optimized
-                "s base incor->other":base_wrong_curr_other,
-                "s base incor->incor":base_wrong_curr_wrong,
+                "s base wrong->other":base_wrong_curr_other,
+                "s base wrong->wrong":base_wrong_curr_wrong,
                 "s base instability":n-base_trace,
                 "s base delta s_accuracy": (curr_category=="CORRECT").sum()/n - (base_category=="CORRECT").sum()/n,
                 "s base delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[base_model_idx].count("d_correct")/n,
@@ -476,7 +476,7 @@ class BenchLLMClient:
                 "s treatment cor->other":treatment_c_curr_other,#base to optimized
                 "s treatment wrong->other":treatment_wrong_curr_other,
                 "s treatment wrong->wrong":treatment_wrong_curr_wrong,
-                "s treatment instability":n-treatment_trace,
+                "s treatment instability":n-treatment_trace if n-treatment_trace!=200 else "-",
                 "s treatment delta s_accuracy":(curr_category=="CORRECT").sum()/n - (curr_no_prune_category=="CORRECT").sum()/n if curr_no_prune_category is not None else "-",
                 "s treatment delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[pure_quantized_idx].count("d_correct")/n if pure_quantized_idx else "-",
                 "s treatment delta precision":treatment_delta_precision if treatment_delta_precision else "-",
@@ -485,7 +485,7 @@ class BenchLLMClient:
                                    base_p2 + 1.96 * treatment_std_precision:.2f}" if treatment_std_precision else "-",
                 "s treatment ci recall": f"{base_r2 - 1.96 * treatment_std_recall:.2f}..{
                                    base_r2 + 1.96 * treatment_std_recall:.2f}" if treatment_std_recall else "-",
-                "s treatment mcnemar p": str(f"{treatment_p_val:.2f}") if treatment_p_val else "-" # represents that pruned and pruned->quantized distributions differ
+                "s treatment mcnemar p": str(f"{treatment_p_val:.2f}") if treatment_p_val<0.1 else ">" # represents that pruned and pruned->quantized distributions differ
             })
 
         aggregated_metrics_df = pd.DataFrame(aggregated_metrics_df).sort_values(by="name",key=lambda x: x.str[::-1]).reset_index(drop=True)
