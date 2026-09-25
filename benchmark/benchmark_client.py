@@ -11,6 +11,8 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 import string
+import pandas as pd
+import numpy as np
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -21,7 +23,7 @@ class BenchLLMClient:
         self.server_type=None
         self.wiki_path=wiki_path
         self.amount_samples=200
-        # self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
+        self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
         self.results={
                         'answers':[],
                         'ppl':[],
@@ -241,6 +243,72 @@ class BenchLLMClient:
             
         return categories
     
+    def mcnemar_bowker_pval(self,categories_a, categories_b, return_stat=False):
+        """
+        McNemar-Bowker test for two paired categorical measurements.
+
+        Parameters
+        ----------
+        categories_a : array-like, pd.Series, or single-column pd.DataFrame
+            Category label for each sample under condition A
+            (e.g. the no-treatment / no-pruning model).
+        categories_b : array-like, pd.Series, or single-column pd.DataFrame
+            Category label for each sample under condition B
+            (e.g. the treatment model). Must be aligned sample-by-sample
+            with `categories_a` (same length / same index).
+        return_stat : bool, default False
+            If True, also return (statistic, dof).
+
+        Returns
+        -------
+        p_val : float
+            P-value of the McNemar-Bowker test.
+            (optionally also the chi-square statistic and degrees of freedom)
+        """
+        # --- coerce DataFrames to Series so we can line them up ---
+        if isinstance(categories_a, pd.DataFrame):
+            if categories_a.shape[1] != 1:
+                raise ValueError("categories_a DataFrame must have exactly one column")
+            categories_a = categories_a.iloc[:, 0]
+        if isinstance(categories_b, pd.DataFrame):
+            if categories_b.shape[1] != 1:
+                raise ValueError("categories_b DataFrame must have exactly one column")
+            categories_b = categories_b.iloc[:, 0]
+
+        categories_a = pd.Series(categories_a).reset_index(drop=True)
+        categories_b = pd.Series(categories_b).reset_index(drop=True)
+        if len(categories_a) != len(categories_b):
+            raise ValueError("the two inputs must have the same length")
+
+        # --- build the k x k transition table ---
+        transitions = pd.crosstab(categories_a, categories_b, colnames=["category"])
+
+        # Square it: ensure every label appears on both axes.
+        all_labels = transitions.index.union(transitions.columns)
+        transitions = transitions.reindex(
+            index=all_labels, columns=all_labels, fill_value=0
+        )
+
+        n_mat = transitions.to_numpy()
+        k = n_mat.shape[0]
+
+        # --- McNemar-Bowker statistic ---
+        statistic = 0.0
+        for a in range(k):
+            for b in range(a + 1, k):
+                n_ab = n_mat[a, b]
+                n_ba = n_mat[b, a]
+                denom = n_ab + n_ba
+                if denom > 0:
+                    statistic += (n_ab - n_ba) ** 2 / denom
+
+        dof = k * (k - 1) // 2
+        p_val = 1.0 - scipy.stats.chi2.cdf(statistic, dof)
+
+        if return_stat:
+            return p_val, statistic, dof
+        return p_val
+    
     def compare_results(self, path_to_jsons, base_model_file_name, golden_path="./golden_dataset.json"):
         import pandas as pd
         from pathlib import Path
@@ -341,6 +409,7 @@ class BenchLLMClient:
             base_wrong_curr_other=n-(base_category=="CORRECT").sum()-base_wrong_curr_wrong
             base_c_curr_ic=base_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
             base_ic_curr_c=base_transitions.get("INCORRECT",pd.Series([0])).get("CORRECT",pd.Series([0])).item()
+            base_p_val=self.mcnemar_bowker_pval(base_category,curr_category)
             
             # mcnemar comparison of current treatment (base->pruning->quant) vs no treatment (base->quant)
             treatment_p_val=1
@@ -353,7 +422,7 @@ class BenchLLMClient:
             treatment_c_curr_c=(df['category']=="CORRECT").sum()
             treatment_c_curr_other=0
             treatment_wrong_curr_other=0
-            treatment_wrong_curr_wrong=(df['category']=="INCORRECT").sum()
+            treatment_wrong_curr_wrong=n-(df['category']=="CORRECT").sum()
             treatment_ppl_diff=0
             treatment_trace=0
             # treatment_ic_curr_c=0
@@ -379,7 +448,7 @@ class BenchLLMClient:
                 # treatment_c_curr_ic=treatment_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
                 # treatment_ic_curr_c=treatment_transitions.get("INCORRRECT",pd.Series([0])).get("CORRECT",pd.Series([0])).item()
                 
-                treatment_p_val=1 - scipy.stats.chi2.cdf((treatment_c_curr_other-treatment_wrong_curr_other)**2 / (treatment_c_curr_other+treatment_wrong_curr_other), 1)
+                treatment_p_val=self.mcnemar_bowker_pval(curr_no_prune_category,curr_category)
                 treatment_ppl_diff=ppls[i]-ppls[pure_quantized_idx]
                 
                 # precision ci compared to no treatment model
@@ -438,8 +507,6 @@ class BenchLLMClient:
             base_n2=len(golden_df) # precision was calculated for every response
             base_std_precision=(base_p1*(1-base_p1)/base_n1 + base_p2*(1-base_p2)/base_n2)**0.5
             
-            base_p_val=1 - scipy.stats.chi2.cdf((base_wrong_curr_other-base_c_curr_other)**2 / (base_wrong_curr_other+base_c_curr_other), 1) if base_wrong_curr_other+base_c_curr_other>0 else 1
-            
             # recall ci compared to base model
             base_r1=sum(recalls[base_model_idx])/n
             base_r2=sum(recalls[i])/n
@@ -476,7 +543,7 @@ class BenchLLMClient:
                 "s treatment cor->other":treatment_c_curr_other,#base to optimized
                 "s treatment wrong->other":treatment_wrong_curr_other,
                 "s treatment wrong->wrong":treatment_wrong_curr_wrong,
-                "s treatment instability":n-treatment_trace if n-treatment_trace!=200 else "-",
+                "s treatment instability":n-treatment_trace if n-treatment_trace!=200 else 0,
                 "s treatment delta s_accuracy":(curr_category=="CORRECT").sum()/n - (curr_no_prune_category=="CORRECT").sum()/n if curr_no_prune_category is not None else "-",
                 "s treatment delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[pure_quantized_idx].count("d_correct")/n if pure_quantized_idx else "-",
                 "s treatment delta precision":treatment_delta_precision if treatment_delta_precision else "-",
@@ -493,9 +560,6 @@ class BenchLLMClient:
         return aggregated_metrics_df, analysis_df
     
     def calc_corr(self, result_df):
-        import pandas as pd
-        import numpy as np
-        
         tmp_df = result_df.copy(deep=True)
         
         def extract_mean(value):
@@ -526,6 +590,12 @@ class BenchLLMClient:
         tmp_df = tmp_df.apply(pd.to_numeric, errors='coerce')
         
         return tmp_df.corr()
+    
+    def calc_category_acc(self,series1:pd.Series,series2:pd.Series):
+        ct = pd.crosstab(series1, series2)
+        per_class_acc = ct.values.diagonal() / ct.sum(axis=1)
+        per_class_acc = pd.Series(per_class_acc, index=ct.index, name='accuracy')
+        return per_class_acc
     
     def plot_tradeoffs(self, x, *ys, group_labels = None, names=None, colors=None, titles=None, xlabel='base instability', figsize=(20, 4), ncols=4):
         import matplotlib.pyplot as plt
@@ -601,7 +671,7 @@ if __name__ =="__main__":
         client.start_server(model)
         time.sleep(400) # waiting is performed ob server side
         client.bench_speed()
-        client.bench_perplexity()
+        # client.bench_perplexity()
         client.save_to_file(f'./{args.results_path}/{client.model_id}')
         client.stop_server()
         time.sleep(120)
