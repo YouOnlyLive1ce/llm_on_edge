@@ -70,7 +70,7 @@ class BenchLLMServer:
                 [
                     "python", "-c",
                     "from gptqmodel import GPTQModel, BACKEND; "
-                    f"model = GPTQModel.load('{self.model_id}', device='cpu')"
+                    f"model = GPTQModel.load('{self.model_id}', device='cpu'); "
                     f"model.serve(host='0.0.0.0', port={self.llm_port}, async_mode=True)"
                 ],
                 stdout=subprocess.PIPE,

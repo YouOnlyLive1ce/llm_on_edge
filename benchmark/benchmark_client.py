@@ -13,6 +13,7 @@ from nltk.tokenize import word_tokenize
 import string
 import pandas as pd
 import numpy as np
+from scipy.stats import binom, chi2
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ class BenchLLMClient:
         self.server_type=None
         self.wiki_path=wiki_path
         self.amount_samples=200
-        self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
+        # self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
         self.results={
                         'answers':[],
                         'ppl':[],
@@ -243,6 +244,14 @@ class BenchLLMClient:
             
         return categories
     
+    def mcnemar_exact_pval(self, b: int, c: int) -> float:
+        check_valid = lambda n: isinstance(n, int) or (isinstance(n, float) and n.is_integer())
+        if not all(map(check_valid, [b, c])):
+            raise ValueError("b and c must be integers!")
+        n_min, n_max = sorted([b, c])
+        pvalue = 2 * binom.cdf(n_min, n_min+n_max, 0.5) - binom.pmf(n_min, n_min+n_max, 0.5)
+        return pvalue
+        
     def mcnemar_bowker_pval(self,categories_a, categories_b, return_stat=False):
         """
         McNemar-Bowker test for two paired categorical measurements.
@@ -309,6 +318,35 @@ class BenchLLMClient:
             return p_val, statistic, dof
         return p_val
     
+    def bootstrap_categorical(self, data, n_bootstrap=10000, ci=0.95):
+        """
+        Bootstrap confidence intervals for all category proportions
+        """
+        categories = np.unique(data)
+        n = len(data)
+        # Store bootstrap results for each category
+        bootstrap_results = {cat: [] for cat in categories}
+        
+        for _ in range(n_bootstrap):
+            sample = np.random.choice(data, size=n, replace=True)
+            for cat in categories:
+                bootstrap_results[cat].append((sample == cat).sum()/n)
+        
+        # Calculate CIs for each category
+        alpha = 1 - ci
+        results = {}
+        
+        for cat in categories:
+            props = bootstrap_results[cat]
+            results[cat] = {
+                'proportion': np.mean(data == cat),
+                'ci_lower': np.percentile(props, 100 * alpha/2),
+                'ci_upper': np.percentile(props, 100 * (1 - alpha/2)),
+                'se': np.std(props)
+            }
+        
+        return results
+        
     def compare_results(self, path_to_jsons, base_model_file_name, golden_path="./golden_dataset.json"):
         import pandas as pd
         from pathlib import Path
@@ -400,16 +438,41 @@ class BenchLLMClient:
             base_category = dfs[base_model_idx]['category']
             curr_category = df['category']
             base_transitions=pd.crosstab(base_category, curr_category, colnames=["category"])
-            # mcnemar compared to base model
+            other_cats_list=["MALFORMED","EMPTY","NO_FINAL_ANSWER","QUESTION_GENERATED"]
+            
             base_c_curr_c=base_transitions.get("CORRECT").get("CORRECT").item()
-            base_c_curr_other=(base_category=="CORRECT").sum()-base_c_curr_c
+            base_c_curr_ic=base_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
+            base_c_curr_other=base_transitions.get("CORRECT",pd.Series([0])).sum()-base_c_curr_c-base_c_curr_ic-base_transitions.get("CORRECT",pd.Series([0])).get("JUDGE_FAIL",pd.Series([0])).item()
+            
             common_labels = base_transitions.index.intersection(base_transitions.columns)
             base_trace = sum(base_transitions.loc[label, label] for label in common_labels)
-            base_wrong_curr_wrong=base_trace-base_c_curr_c
-            base_wrong_curr_other=n-(base_category=="CORRECT").sum()-base_wrong_curr_wrong
-            base_c_curr_ic=base_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
             base_ic_curr_c=base_transitions.get("INCORRECT",pd.Series([0])).get("CORRECT",pd.Series([0])).item()
-            base_p_val=self.mcnemar_bowker_pval(base_category,curr_category)
+            base_ic_curr_ic=base_transitions.get("INCORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
+            base_ic_curr_other=base_transitions.get("INCORRECT",pd.Series([0])).sum()-base_ic_curr_c-base_ic_curr_ic-base_transitions.get("INCORRECT",pd.Series([0])).get("JUDGE_FAIL",pd.Series([0])).item()
+            
+            base_other_curr_c=(curr_category.isin(other_cats_list) & (base_category=="CORRECT")).sum()
+            base_other_curr_ic=(curr_category.isin(other_cats_list) & (base_category=="INCORRECT")).sum()
+            base_other_curr_other=(curr_category.isin(other_cats_list)).sum()-base_other_curr_c-base_other_curr_ic
+            base_judge_failed=((base_category=="JUDGE_FAIL") | (curr_category=="JUDGE_FAIL")).sum()
+            
+            # mcnemar compared to base model
+            # base_p_val=self.mcnemar_bowker_pval(base_category,curr_category)
+            base_p_val=self.mcnemar_exact_pval(base_c_curr_ic,base_ic_curr_c)
+            
+            # ci
+            benefit_ci=self.bootstrap_categorical((base_category.isin(["INCORRECT"]+other_cats_list).to_numpy() \
+                & (curr_category=="CORRECT").to_numpy() )).get(True,{'ci_lower':1,'ci_upper':1,'proportion':1})
+            harm_ci=self.bootstrap_categorical((curr_category.isin(["INCORRECT"]+other_cats_list).to_numpy() \
+                & (base_category=="CORRECT").to_numpy() )).get(True,{'ci_lower':1,'ci_upper':1,'proportion':1})
+            churn_ci=self.bootstrap_categorical((base_category.isin(["INCORRECT"]+other_cats_list).to_numpy() \
+                & (curr_category=="CORRECT").to_numpy() ) \
+                + (curr_category.isin(["INCORRECT"]+other_cats_list).to_numpy() \
+                & (base_category=="CORRECT").to_numpy() )).get(True,{'ci_lower':1,'ci_upper':1,'proportion':1})
+            a1=(base_category=="CORRECT").sum()/n
+            a2=(curr_category=="CORRECT").sum()/n
+            tn1=len(golden_df)
+            tn2=len(golden_df)
+            base_std_accuracy=(a1*(1-a1)/tn1 + a2*(1-a2)/tn2)**0.5
             
             # mcnemar comparison of current treatment (base->pruning->quant) vs no treatment (base->quant)
             treatment_p_val=1
@@ -420,13 +483,22 @@ class BenchLLMClient:
             curr_no_prune_category=None
             pure_quantized_idx=None
             treatment_c_curr_c=(df['category']=="CORRECT").sum()
-            treatment_c_curr_other=0
-            treatment_wrong_curr_other=0
-            treatment_wrong_curr_wrong=n-(df['category']=="CORRECT").sum()
-            treatment_ppl_diff=0
-            treatment_trace=0
-            # treatment_ic_curr_c=0
-            # treatment_c_curr_ic=0
+            treatment_c_curr_other=None
+            treatment_ppl_diff=None
+            treatment_trace=None
+            treatment_c_curr_c=None
+            treatment_c_curr_ic=None
+            treatment_c_curr_other=None
+            treatment_trace=None
+            treatment_ic_curr_c=None
+            treatment_ic_curr_ic=None
+            treatment_ic_curr_other=None
+            treatment_other_curr_c=None
+            treatment_other_curr_ic=None
+            treatment_other_curr_other=None
+            treatment_judge_failed=None
+            treatment_p_val=None
+            treatment_ppl_diff=None
             if "quantized" in json_files[i] and ("sparsegpt" in json_files[i] or "wanda" in json_files[i]):
                 # corresponding no treatment experiment
                 pure_quantized=json_files[i].replace("unstructured_","").replace("sparsegpt_","").replace("wanda_","").replace("0.2_","").replace("0.5_","")
@@ -440,15 +512,22 @@ class BenchLLMClient:
                 # mcnemar compared treatment to no treatment
                 print("comparing treatment model",json_files[i]," to no treatment (no pruning) model",json_files[pure_quantized_idx])
                 treatment_c_curr_c=treatment_transitions.get("CORRECT").get("CORRECT").item()
-                treatment_c_curr_other=(curr_no_prune_category=="CORRECT").sum()-treatment_c_curr_c
+                treatment_c_curr_ic=treatment_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
+                treatment_c_curr_other=treatment_transitions.get("CORRECT",pd.Series([0])).sum()-treatment_c_curr_c-treatment_c_curr_ic-treatment_transitions.get("CORRECT",pd.Series([0])).get("JUDGE_FAIL",pd.Series([0])).item()
+                
                 common_labels = treatment_transitions.index.intersection(treatment_transitions.columns)
                 treatment_trace = sum(treatment_transitions.loc[label, label] for label in common_labels)
-                treatment_wrong_curr_wrong=treatment_trace-treatment_c_curr_c
-                treatment_wrong_curr_other=n-(curr_no_prune_category=="CORRECT").sum()-treatment_wrong_curr_wrong
-                # treatment_c_curr_ic=treatment_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
-                # treatment_ic_curr_c=treatment_transitions.get("INCORRRECT",pd.Series([0])).get("CORRECT",pd.Series([0])).item()
+                treatment_ic_curr_c=treatment_transitions.get("INCORRECT",pd.Series([0])).get("CORRECT",pd.Series([0])).item()
+                treatment_ic_curr_ic=treatment_transitions.get("INCORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
+                treatment_ic_curr_other=treatment_transitions.get("INCORRECT",pd.Series([0])).sum()-treatment_ic_curr_c-treatment_ic_curr_ic-treatment_transitions.get("INCORRECT",pd.Series([0])).get("JUDGE_FAIL",pd.Series([0])).item()
                 
-                treatment_p_val=self.mcnemar_bowker_pval(curr_no_prune_category,curr_category)
+                treatment_other_curr_c=(curr_category.isin(other_cats_list) & (curr_no_prune_category=="CORRECT")).sum()
+                treatment_other_curr_ic=(curr_category.isin(other_cats_list) & (curr_no_prune_category=="INCORRECT")).sum()
+                treatment_other_curr_other=(curr_category.isin(other_cats_list)).sum()-treatment_other_curr_c-treatment_other_curr_ic
+                treatment_judge_failed=((curr_no_prune_category=="JUDGE_FAIL") | (curr_category=="JUDGE_FAIL")).sum()
+                
+                # treatment_p_val=self.mcnemar_bowker_pval(curr_no_prune_category,curr_category)
+                treatment_p_val=self.mcnemar_exact_pval(treatment_c_curr_ic,treatment_ic_curr_c)
                 treatment_ppl_diff=ppls[i]-ppls[pure_quantized_idx]
                 
                 # precision ci compared to no treatment model
@@ -458,7 +537,7 @@ class BenchLLMClient:
                 tn2=len(golden_df) # precision was calculated for every response
                 treatment_std_precision=(tp1*(1-tp1)/tn1 + tp2*(1-tp2)/tn2)**0.5
                 
-                # recall ci compared to treatment model
+                # recall ci compared to no treatment model
                 tr1=sum(recalls[pure_quantized_idx])/n
                 tr2=sum(recalls[i])/n
                 tn1=len(golden_df) # recall was calculated for every response
@@ -501,6 +580,13 @@ class BenchLLMClient:
             # n2=(curr_category=="CORRECT").sum()+ (curr_category=="INCORRECT").sum()
             
             # precision ci compared to base model
+            base_a1=(base_category=="CORRECT").sum()/n
+            base_a2=(curr_category=="CORRECT").sum()/n
+            base_n1=len(golden_df) # precision was calculated for every response
+            base_n2=len(golden_df) # precision was calculated for every response
+            base_std_accuracy=(base_a1*(1-base_a1)/base_n1 + base_a2*(1-base_a2)/base_n2)**0.5
+            
+            # precision ci compared to base model
             base_p1=sum(precisions[base_model_idx])/n
             base_p2=sum(precisions[i])/n
             base_n1=len(golden_df) # precision was calculated for every response
@@ -524,26 +610,48 @@ class BenchLLMClient:
                 "d base wrong->wrong":d_base_wrong_curr_wrong,
                 
                 "s base cor->cor": base_c_curr_c, #base to optimized
-                "s base cor->other":base_c_curr_other,#base to optimized
-                "s base wrong->other":base_wrong_curr_other,
-                "s base wrong->wrong":base_wrong_curr_wrong,
+                "s base cor->incor":base_c_curr_ic,     # harm flips
+                "s base cor->other":base_c_curr_other,  # harm flips
+                "s base incor->cor":base_ic_curr_c,  # benefit flips
+                "s base incor->incor":base_ic_curr_ic,
+                "s base incor->other":base_ic_curr_other,
+                "s base other->cor":base_other_curr_c,#benefit flips
+                "s base other->incor":base_other_curr_ic,
+                "s base other->other":base_other_curr_other,
+                "s base judge_failed":base_judge_failed,
+                "s base flips":base_c_curr_ic+base_c_curr_other+base_ic_curr_c+base_other_curr_c,
                 "s base instability":n-base_trace,
                 "s base delta s_accuracy": (curr_category=="CORRECT").sum()/n - (base_category=="CORRECT").sum()/n,
                 "s base delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[base_model_idx].count("d_correct")/n,
                 "s base delta precision":base_p2-base_p1,
                 "s base delta recall":base_r2-base_r1,
+                "s base ci accuracy":f"{base_a2 - 1.96 * base_std_accuracy:.2f}..{
+                                   base_a2 + 1.96 * base_std_accuracy:.2f}",
                 "s base ci precision": f"{base_p2 - 1.96 * base_std_precision:.2f}..{
                                    base_p2 + 1.96 * base_std_precision:.2f}",
                 "s base ci recall":f"{base_r2 - 1.96 * base_std_recall:.2f}..{
                                    base_r2 + 1.96 * base_std_recall:.2f}",
+                "s base ci benefit":f"{benefit_ci['proportion']}∈ {benefit_ci['ci_lower']}..{benefit_ci['ci_upper']}" if benefit_ci['ci_lower']<=benefit_ci['proportion']<=benefit_ci['ci_upper'] \
+                    else f"{benefit_ci['proportion']}∉ {benefit_ci['ci_lower']}..{benefit_ci['ci_upper']}",
+                "s base ci harm":f"{harm_ci['proportion']}∈ {harm_ci['ci_lower']}..{harm_ci['ci_upper']}" if harm_ci['ci_lower']<=harm_ci['proportion']<=harm_ci['ci_upper'] \
+                    else f"{harm_ci['proportion']}∉ {harm_ci['ci_lower']}..{harm_ci['ci_upper']}",
+                "s base ci churn":f"{churn_ci['proportion']}∈ {churn_ci['ci_lower']}..{churn_ci['ci_upper']}" if churn_ci['ci_lower']<=churn_ci['proportion']<=churn_ci['ci_upper'] \
+                    else f"{churn_ci['proportion']}∉ {churn_ci['ci_lower']}..{churn_ci['ci_upper']}",
                 "s base mcnemar p": str(f"{base_p_val:.2f}") if base_p_val<0.1 else ">", # represents that base and optimized distributions differ
                 
-                "treatment ppl delta":treatment_ppl_diff,
-                "s treatment cor->cor": treatment_c_curr_c, #base to optimized
-                "s treatment cor->other":treatment_c_curr_other,#base to optimized
-                "s treatment wrong->other":treatment_wrong_curr_other,
-                "s treatment wrong->wrong":treatment_wrong_curr_wrong,
-                "s treatment instability":n-treatment_trace if n-treatment_trace!=200 else 0,
+                "s treat ppl delta": treatment_ppl_diff if treatment_ppl_diff != None else '-',
+                "s treat cor->cor": treatment_c_curr_c if treatment_c_curr_c != None else '-',
+                "s treat cor->incor": treatment_c_curr_ic if treatment_c_curr_ic != None else '-',     # harm flips
+                "s treat cor->other": treatment_c_curr_other if treatment_c_curr_other != None else '-',  # harm flips
+                "s treat incor->cor": treatment_ic_curr_c if treatment_ic_curr_c != None else '-',  # benefit flips
+                "s treat incor->incor": treatment_ic_curr_ic if treatment_ic_curr_ic != None else '-',
+                "s treat incor->other": treatment_ic_curr_other if treatment_ic_curr_other != None else '-',
+                "s treat other->cor": treatment_other_curr_c if treatment_other_curr_c != None else '-',  # benefit flips
+                "s treat other->incor": treatment_other_curr_ic if treatment_other_curr_ic != None else '-',
+                "s treat other->other": treatment_other_curr_other if treatment_other_curr_other != None else '-',
+                "s treat judge_failed":treatment_judge_failed if treatment_judge_failed != None else '-',
+                "s treatment flips": (treatment_c_curr_ic + treatment_c_curr_other + treatment_ic_curr_c + treatment_other_curr_c) if all(x != None for x in [treatment_c_curr_ic, treatment_c_curr_other, treatment_ic_curr_c, treatment_other_curr_c]) else '-',
+                "s treatment instability": (treatment_c_curr_ic + treatment_c_curr_other + treatment_ic_curr_c + treatment_ic_curr_other + treatment_other_curr_c + treatment_other_curr_ic) if all(x != None for x in [treatment_c_curr_ic, treatment_c_curr_other, treatment_ic_curr_c, treatment_other_curr_c]) else '-',
                 "s treatment delta s_accuracy":(curr_category=="CORRECT").sum()/n - (curr_no_prune_category=="CORRECT").sum()/n if curr_no_prune_category is not None else "-",
                 "s treatment delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[pure_quantized_idx].count("d_correct")/n if pure_quantized_idx else "-",
                 "s treatment delta precision":treatment_delta_precision if treatment_delta_precision else "-",
@@ -552,7 +660,7 @@ class BenchLLMClient:
                                    base_p2 + 1.96 * treatment_std_precision:.2f}" if treatment_std_precision else "-",
                 "s treatment ci recall": f"{base_r2 - 1.96 * treatment_std_recall:.2f}..{
                                    base_r2 + 1.96 * treatment_std_recall:.2f}" if treatment_std_recall else "-",
-                "s treatment mcnemar p": str(f"{treatment_p_val:.2f}") if treatment_p_val<0.1 else ">" # represents that pruned and pruned->quantized distributions differ
+                "s treatment mcnemar p": str(f"{treatment_p_val:.2f}") if treatment_p_val and treatment_p_val<0.1 else ">" # represents that pruned and pruned->quantized distributions differ
             })
 
         aggregated_metrics_df = pd.DataFrame(aggregated_metrics_df).sort_values(by="name",key=lambda x: x.str[::-1]).reset_index(drop=True)
@@ -591,11 +699,23 @@ class BenchLLMClient:
         
         return tmp_df.corr()
     
-    def calc_category_acc(self,series1:pd.Series,series2:pd.Series):
-        ct = pd.crosstab(series1, series2)
-        per_class_acc = ct.values.diagonal() / ct.sum(axis=1)
-        per_class_acc = pd.Series(per_class_acc, index=ct.index, name='accuracy')
-        return per_class_acc
+    def calc_category_acc(self, series1, series2):
+        common_labels = ["CORRECT", "INCORRECT", "MALFORMED",
+                        "EMPTY", "NO_FINAL_ANSWER", "QUESTION_GENERATED"]
+
+        # normalize both series to uppercase
+        s1 = series1.astype(str).str.upper()
+        s2 = series2.astype(str).str.upper()
+
+        ct = pd.crosstab(s1, s2)
+
+        result = {}
+        for label in common_labels:
+            # same normalized label used everywhere
+            numerator   = ct.get(label, pd.Series(dtype=int)).get(label, 0)
+            denominator = ((s1 == label) | (s2 == label)).sum()
+            result[label] = numerator / denominator if denominator else float("nan")
+        return result
     
     def plot_tradeoffs(self, x, *ys, group_labels = None, names=None, colors=None, titles=None, xlabel='base instability', figsize=(20, 4), ncols=4):
         import matplotlib.pyplot as plt
