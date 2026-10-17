@@ -61,6 +61,21 @@ def _bench(fn: Callable[[], None], *, device: str, warmup: int, trials: int) -> 
         samples_ms.append((time.perf_counter() - t0) * 1000.0)
     return samples_ms
 
+def _bench_decode(fn: Callable[[], None], *, device: str, warmup: int, trials: int) -> list[float]:
+    samples_ms: list[float] = []
+    tokens_amount:list[int] = []
+    for _ in range(warmup):
+        fn()
+        _sync_cuda(device)
+
+    for _ in range(trials):
+        _sync_cuda(device)
+        t0 = time.perf_counter()
+        tokens_amount_sample=fn()
+        _sync_cuda(device)
+        tokens_amount.append(tokens_amount_sample)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    return samples_ms, tokens_amount
 
 def _build_prompt(sentence_str: str, tokenizer: AutoTokenizer, target_tokens: int) -> tuple[str, int]:
     """Build a prompt by repeating a sentence until it reaches target_tokens"""
@@ -93,11 +108,12 @@ def _gptq_decode(model, tokenizer, prompt: str, decode_tokens: int, device: str)
             generated = model.generate(
                 **inputs,
                 max_new_tokens=decode_tokens,
-                do_sample=False,
-                use_cache=True
+                do_sample=False, # differ from actual benchmark do_sample=True. see gptq_serve.log example run
+                use_cache=False # so it calculates prefill+decode
             )
-
-    return run_once, decode_tokens
+        return generated.shape[-1]
+    
+    return run_once, None
 
 
 def gptqmodel_speed(
@@ -175,13 +191,16 @@ def gptqmodel_speed(
                 prompt_tps = [prefill_tokens / (ms / 1000.0) for ms in prefill_samples]
                 all_prompt_per_second.extend(prompt_tps)
 
-                decode_fn, decode_tokens_actual = _gptq_decode(model.model, tokenizer, built_prompt, decode_tokens, dev)
-                decode_samples = _bench(
+                decode_fn, _ = _gptq_decode(model.model, tokenizer, built_prompt, decode_tokens, dev)
+                prefill_decode_samples, decode_tokens_samples = _bench_decode(
                     decode_fn,
                     device=dev,
                     warmup=warmup,
                     trials=trials
                 )
+                
+                decode_tokens_actual=sum(decode_tokens_samples)/len(decode_tokens_samples)
+                decode_samples=prefill_decode_samples-prefill_samples
                 
                 # Create summary
                 decode_summary = TrialSummary(

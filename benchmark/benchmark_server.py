@@ -34,7 +34,7 @@ class BenchLLMServer:
     #query client {chat,metrics}<- ->{chat} fastapi {chat}<- ->{chat}llm
     
     app=FastAPI() # one server instance for all benches
-    def __init__(self,serv_path,ppl_path,fastapi_port="8080",llm_port="8081"):
+    def __init__(self,serv_path,ppl_path,logs_path="./out/logs",fastapi_port="8080",llm_port="8081"):
         self.executable_server_path=serv_path
         self.server_type=None # "llama.cpp" or "gptqmodel"
         self.executable_ppl_path=ppl_path
@@ -42,6 +42,9 @@ class BenchLLMServer:
         self.fastapi_port=fastapi_port # exposed for external requests
         self.llm_port=llm_port # only for internal requests
         self.llm_openai_client=None
+        self.logs_path=logs_path
+        self.log_file_name=None
+        self.log_file=None
         self.llm_pipe=None # automatic server setup
         self.gptqmodel=None # need for measuring gptqmodel_speed
         
@@ -53,18 +56,43 @@ class BenchLLMServer:
                     }
     
     def start_llm_server(self,request):
+        from pathlib import Path
         self.model_id=request.get("model_id")
-        print(self.model_id)
+        print(f"model {self.model_id}")
+        self.log_file_name = f"{self.logs_path}/{self.model_id}.log"
+        Path(self.log_file_name).parent.mkdir(parents=True, exist_ok=True)
+        self.log_file = open(self.log_file_name, "a+",)
+        
         if request.get("server_type")=="llama.cpp":
             # llamacpp gguf bench
             self.server_type="llama.cpp"
-            self.llm_pipe=subprocess.Popen([self.executable_server_path, '-m', self.model_id, '--port',self.llm_port, '--no-cache-prompt','-cram', '0', '--parallel','1'], stdout=subprocess.PIPE)
+            
+            # print server version
+            subprocess.run(
+                [self.executable_server_path, '--version'],
+                stdout=self.log_file,
+                stderr=subprocess.STDOUT,
+            )
+            
+            self.llm_pipe=subprocess.Popen([
+                self.executable_server_path, '-m', self.model_id, '--port',self.llm_port,
+                '--no-cache-prompt','-cram', '0', '--parallel','1','--verbose'], 
+                stdout=self.log_file,
+                stderr=subprocess.STDOUT)
 
         elif request.get("server_type")=="gptqmodel":
             # gptqmodel safetensors bench
             self.server_type="gptqmodel"
+            
+            # print server version
+            import gptqmodel
+            self.log_file.write(f"GPTQModel version: {gptqmodel.__version__}\n")
+            self.log_file.flush()
+            
+            # used to measure speed
             from gptqmodel import GPTQModel, BACKEND
             self.gptqmodel=GPTQModel.load(self.model_id,device="cpu")
+            
             # need to run separate process because current is blocked by fastapi uvicorn loop
             self.llm_pipe = subprocess.Popen(
                 [
@@ -73,27 +101,29 @@ class BenchLLMServer:
                     f"model = GPTQModel.load('{self.model_id}', device='cpu'); "
                     f"model.serve(host='0.0.0.0', port={self.llm_port}, async_mode=True)"
                 ],
-                stdout=subprocess.PIPE,
+                stdout=self.log_file,
                 stderr=subprocess.STDOUT,
             )
+        # set general stdout to log_file descriptor
+        import sys
+        sys.stdout = self.log_file
+        print(f"logs redirected to file {self.log_file_name}")
     
     def stop_llm_server(self):
         gc.collect()
-        if self.server_type=="llama.cpp":
+        try:
+            if self.server_type=="gptqmodel":
+                self.gptqmodel=None
             self.model_id=None
             self.llm_openai_client=None
             self.llm_pipe.stdout.close()
             self.llm_pipe.terminate()
             self.llm_pipe=None
+            self.log_file.close()
+            self.log_file=None
             self.server_type=None
-        elif self.server_type=="gptqmodel":
-            self.model_id=None
-            self.llm_openai_client=None
-            self.llm_pipe.stdout.close()
-            self.llm_pipe.terminate()
-            self.model_id=None
-            self.server_type=None
-            self.gptqmodel=None
+        except Exception as e:
+            print(e)
     
     def setup_openai_client(self):
         self.llm_openai_client=OpenAI(base_url=f"http://localhost:{self.llm_port}/v1",api_key="")
@@ -115,8 +145,9 @@ class BenchLLMServer:
         response = benchllmserver.llm_openai_client.chat.completions.create(
             model=benchllmserver.model_id,
             messages=request.messages,
-            # temperature=request.temperature,
-            max_tokens=request.max_tokens
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            extra_body={'repetition_penalty': request.repetition_penalty},
         )
         clean_response={}
         print(response)
@@ -147,8 +178,8 @@ class BenchLLMServer:
             # Run perplexity calculation
             ppl_llm_process = subprocess.Popen(
                 [benchllmserver.executable_ppl_path, '-m', benchllmserver.model_id, 
-                '--chunks', str(request.amount), '-f', temp_file], 
-                stdout=subprocess.PIPE,
+                '--chunks', '1', '-f', temp_file], 
+                stdout=benchllmserver.log_file,
                 stderr=subprocess.STDOUT,
                 text=True
             )
@@ -173,10 +204,11 @@ if __name__ =="__main__":
     import uvicorn
     parser = argparse.ArgumentParser(description="Execute the model optimization llm_processline")
     
+    parser.add_argument("--logs-path",default="./out/logs")
     parser.add_argument("--serv-path",default="./llama.cpp/build/bin/llama-server")
     parser.add_argument("--ppl-path", default="./llama.cpp/build/bin/llama-perplexity")
     # gptq, awq setup comes from gptqmodel library
     args = parser.parse_args()
     
-    benchllmserver=BenchLLMServer(args.serv_path,args.ppl_path)
+    benchllmserver=BenchLLMServer(args.serv_path,args.ppl_path,logs_path=args.logs_path)
     uvicorn.run(benchllmserver.app, host="0.0.0.0", port=8080)

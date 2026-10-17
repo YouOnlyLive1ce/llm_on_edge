@@ -23,7 +23,7 @@ class BenchLLMClient:
         self.model_id=None
         self.server_type=None
         self.wiki_path=wiki_path
-        self.amount_samples=200
+        self.amount_samples=2
         # self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
         self.results={
                         'answers':[],
@@ -290,7 +290,7 @@ class BenchLLMClient:
             raise ValueError("the two inputs must have the same length")
 
         # --- build the k x k transition table ---
-        transitions = pd.crosstab(categories_a, categories_b, colnames=["category"])
+        transitions = pd.crosstab(categories_b, categories_a, colnames=["category"])
 
         # Square it: ensure every label appears on both axes.
         all_labels = transitions.index.union(transitions.columns)
@@ -390,7 +390,10 @@ class BenchLLMClient:
             recalls.append(self.calc_scores(candidate_answers,golden_df,'recall'))
             f1s.append(self.calc_scores(candidate_answers,golden_df,'f1'))
             ems.append(self.calc_scores(candidate_answers,golden_df,'exact_match'))
-            ppls.append(mean_std(df['ppl'])[0])
+            if "gguf" in file:
+                ppls.append(mean_std(pd.Series([df['ppl'][0]]))[0])
+            else:
+                ppls.append(mean_std(df['ppl'])[0])
             determenistic_categories.append(self.calc_categories(candidate_answers,golden_df))
             dfs.append(df)
 
@@ -414,14 +417,17 @@ class BenchLLMClient:
             # extensive results on which figures in paper are build
             raw_metrics_df.to_json(f"../../out/raw_results/{Path(json_files[i]).name}",orient='records',indent=2)
             
-            ppl_str = f"{mean_std(df['ppl'])[0]:.2f}+-{mean_std(df['ppl'])[1]:.2f}"
+            if "gguf" in json_files[i]:
+                ppl_str = f"{df['ppl'][0]:.2f}+-nan"
+            else:
+                ppl_str = f"{mean_std(df['ppl'])[0]:.2f}+-{mean_std(df['ppl'])[1]:.2f}"
             prefill_str = f"{mean_std(df['prompt_per_second'])[0]:.2f}+-{mean_std(df['prompt_per_second'])[1]:.2f}"
             decode_str = f"{mean_std(df['predicted_per_second'])[0]:.2f}+-{mean_std(df['predicted_per_second'])[1]:.2f}"
             
             # determenistic categories
             d_base_category = pd.Series(determenistic_categories[base_model_idx])
             d_curr_category = raw_metrics_df['d_category']
-            d_base_transitions=pd.crosstab(d_base_category, d_curr_category)
+            d_base_transitions=pd.crosstab(d_curr_category, d_base_category)
             # mcnemar compared to base model
             # treatment_c_curr_c=treatment_transitions.get("CORRECT").get("CORRECT").item()
             # treatment_c_curr_other=(curr_no_prune_category=="CORRECT").sum()-treatment_c_curr_c
@@ -437,12 +443,12 @@ class BenchLLMClient:
             # semantic categories
             base_category = dfs[base_model_idx]['category']
             curr_category = df['category']
-            base_transitions=pd.crosstab(base_category, curr_category, colnames=["category"])
+            base_transitions=pd.crosstab(curr_category, base_category, colnames=["category"])
             other_cats_list=["MALFORMED","EMPTY","NO_FINAL_ANSWER","QUESTION_GENERATED"]
             
             base_c_curr_c=base_transitions.get("CORRECT").get("CORRECT").item()
             base_c_curr_ic=base_transitions.get("CORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
-            base_c_curr_other=base_transitions.get("CORRECT",pd.Series([0])).sum()-base_c_curr_c-base_c_curr_ic-base_transitions.get("CORRECT",pd.Series([0])).get("JUDGE_FAIL",pd.Series([0])).item()
+            base_c_curr_other=int(base_transitions.get("CORRECT",pd.Series([0])).sum()-base_c_curr_c-base_c_curr_ic-base_transitions.get("CORRECT",pd.Series([0])).get("JUDGE_FAIL",pd.Series([0])).item())
             
             common_labels = base_transitions.index.intersection(base_transitions.columns)
             base_trace = sum(base_transitions.loc[label, label] for label in common_labels)
@@ -450,14 +456,14 @@ class BenchLLMClient:
             base_ic_curr_ic=base_transitions.get("INCORRECT",pd.Series([0])).get("INCORRECT",pd.Series([0])).item()
             base_ic_curr_other=base_transitions.get("INCORRECT",pd.Series([0])).sum()-base_ic_curr_c-base_ic_curr_ic-base_transitions.get("INCORRECT",pd.Series([0])).get("JUDGE_FAIL",pd.Series([0])).item()
             
-            base_other_curr_c=(curr_category.isin(other_cats_list) & (base_category=="CORRECT")).sum()
+            base_other_curr_c=int((curr_category.isin(other_cats_list) & (base_category=="CORRECT")).sum())
             base_other_curr_ic=(curr_category.isin(other_cats_list) & (base_category=="INCORRECT")).sum()
             base_other_curr_other=(curr_category.isin(other_cats_list)).sum()-base_other_curr_c-base_other_curr_ic
             base_judge_failed=((base_category=="JUDGE_FAIL") | (curr_category=="JUDGE_FAIL")).sum()
             
             # mcnemar compared to base model
             # base_p_val=self.mcnemar_bowker_pval(base_category,curr_category)
-            base_p_val=self.mcnemar_exact_pval(base_c_curr_ic,base_ic_curr_c)
+            base_p_val=self.mcnemar_exact_pval(base_c_curr_ic+base_c_curr_other,base_ic_curr_c+base_other_curr_c)
             
             # ci
             benefit_ci=self.bootstrap_categorical((base_category.isin(["INCORRECT"]+other_cats_list).to_numpy() \
@@ -508,7 +514,7 @@ class BenchLLMClient:
                         break
                 
                 curr_no_prune_category=dfs[pure_quantized_idx]['category']
-                treatment_transitions=pd.crosstab(curr_no_prune_category,curr_category, colnames=["category"])
+                treatment_transitions=pd.crosstab(curr_category,curr_no_prune_category, colnames=["category"])
                 # mcnemar compared treatment to no treatment
                 print("comparing treatment model",json_files[i]," to no treatment (no pruning) model",json_files[pure_quantized_idx])
                 treatment_c_curr_c=treatment_transitions.get("CORRECT").get("CORRECT").item()
@@ -527,7 +533,7 @@ class BenchLLMClient:
                 treatment_judge_failed=((curr_no_prune_category=="JUDGE_FAIL") | (curr_category=="JUDGE_FAIL")).sum()
                 
                 # treatment_p_val=self.mcnemar_bowker_pval(curr_no_prune_category,curr_category)
-                treatment_p_val=self.mcnemar_exact_pval(treatment_c_curr_ic,treatment_ic_curr_c)
+                treatment_p_val=self.mcnemar_exact_pval(int(treatment_c_curr_ic+treatment_c_curr_other),int(treatment_ic_curr_c+treatment_other_curr_c))
                 treatment_ppl_diff=ppls[i]-ppls[pure_quantized_idx]
                 
                 # precision ci compared to no treatment model
@@ -619,6 +625,8 @@ class BenchLLMClient:
                 "s base other->incor":base_other_curr_ic,
                 "s base other->other":base_other_curr_other,
                 "s base judge_failed":base_judge_failed,
+                "s benefit flips":base_ic_curr_c+base_other_curr_c, 
+                "s harm flips" :base_c_curr_ic+base_c_curr_other,
                 "s base flips":base_c_curr_ic+base_c_curr_other+base_ic_curr_c+base_other_curr_c,
                 "s base instability":n-base_trace,
                 "s base delta s_accuracy": (curr_category=="CORRECT").sum()/n - (base_category=="CORRECT").sum()/n,
@@ -639,27 +647,27 @@ class BenchLLMClient:
                     else f"{churn_ci['proportion']}∉ {churn_ci['ci_lower']}..{churn_ci['ci_upper']}",
                 "s base mcnemar p": str(f"{base_p_val:.2f}") if base_p_val<0.1 else ">", # represents that base and optimized distributions differ
                 
-                "s treat ppl delta": treatment_ppl_diff if treatment_ppl_diff != None else '-',
-                "s treat cor->cor": treatment_c_curr_c if treatment_c_curr_c != None else '-',
-                "s treat cor->incor": treatment_c_curr_ic if treatment_c_curr_ic != None else '-',     # harm flips
-                "s treat cor->other": treatment_c_curr_other if treatment_c_curr_other != None else '-',  # harm flips
-                "s treat incor->cor": treatment_ic_curr_c if treatment_ic_curr_c != None else '-',  # benefit flips
-                "s treat incor->incor": treatment_ic_curr_ic if treatment_ic_curr_ic != None else '-',
-                "s treat incor->other": treatment_ic_curr_other if treatment_ic_curr_other != None else '-',
-                "s treat other->cor": treatment_other_curr_c if treatment_other_curr_c != None else '-',  # benefit flips
-                "s treat other->incor": treatment_other_curr_ic if treatment_other_curr_ic != None else '-',
-                "s treat other->other": treatment_other_curr_other if treatment_other_curr_other != None else '-',
-                "s treat judge_failed":treatment_judge_failed if treatment_judge_failed != None else '-',
-                "s treatment flips": (treatment_c_curr_ic + treatment_c_curr_other + treatment_ic_curr_c + treatment_other_curr_c) if all(x != None for x in [treatment_c_curr_ic, treatment_c_curr_other, treatment_ic_curr_c, treatment_other_curr_c]) else '-',
-                "s treatment instability": (treatment_c_curr_ic + treatment_c_curr_other + treatment_ic_curr_c + treatment_ic_curr_other + treatment_other_curr_c + treatment_other_curr_ic) if all(x != None for x in [treatment_c_curr_ic, treatment_c_curr_other, treatment_ic_curr_c, treatment_other_curr_c]) else '-',
-                "s treatment delta s_accuracy":(curr_category=="CORRECT").sum()/n - (curr_no_prune_category=="CORRECT").sum()/n if curr_no_prune_category is not None else "-",
-                "s treatment delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[pure_quantized_idx].count("d_correct")/n if pure_quantized_idx else "-",
-                "s treatment delta precision":treatment_delta_precision if treatment_delta_precision else "-",
-                "s treatment delta recall":treatment_delta_recall if treatment_delta_recall else "-",
+                "s treat ppl delta": treatment_ppl_diff if treatment_ppl_diff != None else 0,
+                "s treat cor->cor": treatment_c_curr_c if treatment_c_curr_c != None else 0,
+                "s treat cor->incor": treatment_c_curr_ic if treatment_c_curr_ic != None else 0,     # harm flips
+                "s treat cor->other": treatment_c_curr_other if treatment_c_curr_other != None else 0,  # harm flips
+                "s treat incor->cor": treatment_ic_curr_c if treatment_ic_curr_c != None else 0,  # benefit flips
+                "s treat incor->incor": treatment_ic_curr_ic if treatment_ic_curr_ic != None else 0,
+                "s treat incor->other": treatment_ic_curr_other if treatment_ic_curr_other != None else 0,
+                "s treat other->cor": treatment_other_curr_c if treatment_other_curr_c != None else 0,  # benefit flips
+                "s treat other->incor": treatment_other_curr_ic if treatment_other_curr_ic != None else 0,
+                "s treat other->other": treatment_other_curr_other if treatment_other_curr_other != None else 0,
+                "s treat judge_failed":treatment_judge_failed if treatment_judge_failed != None else 0,
+                "s treatment flips": (treatment_c_curr_ic + treatment_c_curr_other + treatment_ic_curr_c + treatment_other_curr_c) if all(x != None for x in [treatment_c_curr_ic, treatment_c_curr_other, treatment_ic_curr_c, treatment_other_curr_c]) else 0,
+                "s treatment instability": (treatment_c_curr_ic + treatment_c_curr_other + treatment_ic_curr_c + treatment_ic_curr_other + treatment_other_curr_c + treatment_other_curr_ic) if all(x != None for x in [treatment_c_curr_ic, treatment_c_curr_other, treatment_ic_curr_c, treatment_other_curr_c]) else 0,
+                "s treatment delta s_accuracy":(curr_category=="CORRECT").sum()/n - (curr_no_prune_category=="CORRECT").sum()/n if curr_no_prune_category is not None else 0,
+                "s treatment delta d_accuracy":determenistic_categories[i].count("d_correct")/n - determenistic_categories[pure_quantized_idx].count("d_correct")/n if pure_quantized_idx else 0,
+                "s treatment delta precision":treatment_delta_precision if treatment_delta_precision else 0,
+                "s treatment delta recall":treatment_delta_recall if treatment_delta_recall else 0,
                 "s treatment ci precision": f"{base_p2 - 1.96 * treatment_std_precision:.2f}..{
-                                   base_p2 + 1.96 * treatment_std_precision:.2f}" if treatment_std_precision else "-",
+                                   base_p2 + 1.96 * treatment_std_precision:.2f}" if treatment_std_precision else 0,
                 "s treatment ci recall": f"{base_r2 - 1.96 * treatment_std_recall:.2f}..{
-                                   base_r2 + 1.96 * treatment_std_recall:.2f}" if treatment_std_recall else "-",
+                                   base_r2 + 1.96 * treatment_std_recall:.2f}" if treatment_std_recall else 0,
                 "s treatment mcnemar p": str(f"{treatment_p_val:.2f}") if treatment_p_val and treatment_p_val<0.1 else ">" # represents that pruned and pruned->quantized distributions differ
             })
 
@@ -700,21 +708,22 @@ class BenchLLMClient:
         return tmp_df.corr()
     
     def calc_category_acc(self, series1, series2):
-        common_labels = ["CORRECT", "INCORRECT", "MALFORMED",
-                        "EMPTY", "NO_FINAL_ANSWER", "QUESTION_GENERATED"]
-
         # normalize both series to uppercase
         s1 = series1.astype(str).str.upper()
         s2 = series2.astype(str).str.upper()
 
-        ct = pd.crosstab(s1, s2)
+        ct = pd.crosstab(s2, s1)
 
         result = {}
-        for label in common_labels:
-            # same normalized label used everywhere
-            numerator   = ct.get(label, pd.Series(dtype=int)).get(label, 0)
-            denominator = ((s1 == label) | (s2 == label)).sum()
-            result[label] = numerator / denominator if denominator else float("nan")
+        numerator   = ct.get("CORRECT", pd.Series(dtype=int)).get("CORRECT", 0)
+        denominator = ((s1 == "CORRECT") | (s2 == "CORRECT")).sum()
+        result["CORRECT"] = numerator / denominator if denominator else float("nan")
+        
+        other_labels=["INCORRECT", "MALFORMED","EMPTY", "NO_FINAL_ANSWER", "QUESTION_GENERATED"]
+        numerator   = sum([ct.get(label, pd.Series(dtype=int)).get(label, 0) for label in other_labels])
+        denominator = ((s1.isin(other_labels)) | (s2.isin(other_labels))).sum()
+        result["OTHER"] = numerator / denominator if denominator else float("nan")
+        
         return result
     
     def plot_tradeoffs(self, x, *ys, group_labels = None, names=None, colors=None, titles=None, xlabel='base instability', figsize=(20, 4), ncols=4):
@@ -774,10 +783,11 @@ if __name__ =="__main__":
     # run all ggufs (original_q16, pruned_q16, pruned_qX) and /quantized/model_{gptq|awq}X.safetensors
     
     # models = [str(path.parent) for path in folder_path.rglob("quantize_config.json")] + [str(path) for path in folder_path.rglob("*.gguf")]
-    models=["./out/smollm2/pruned/unstructured/sparsegpt/0.2/smollm2_unstructured_sparsegpt_0.2_q16.gguf",
-            "./out/smollm2/pruned/unstructured/sparsegpt/0.5/smollm2_unstructured_sparsegpt_0.5_q16.gguf",
-            "./out/smollm2/pruned/unstructured/wanda/0.2/smollm2_unstructured_wanda_0.2_q16.gguf",
-            "./out/smollm2/pruned/unstructured/wanda/0.5/smollm2_unstructured_wanda_0.5_q16.gguf",
+    models=["./out/olmo2/quantized/olmo2_gptq_4",
+            "./out/smollm2/pruned/unstructured/sparsegpt/0.2/smollm2_unstructured_sparsegpt_0.2_q16.gguf"
+            # "./out/smollm2/pruned/unstructured/sparsegpt/0.5/smollm2_unstructured_sparsegpt_0.5_q16.gguf",
+            # "./out/smollm2/pruned/unstructured/wanda/0.2/smollm2_unstructured_wanda_0.2_q16.gguf",
+            # "./out/smollm2/pruned/unstructured/wanda/0.5/smollm2_unstructured_wanda_0.5_q16.gguf",
             # "./out/olmo2/pruned/unstructured/sparsegpt/0.2/olmo2_unstructured_sparsegpt_0.2_q16.gguf",
             # "./out/olmo2/pruned/unstructured/sparsegpt/0.5/olmo2_unstructured_sparsegpt_0.5_q16.gguf",
             # "./out/olmo2/pruned/unstructured/wanda/0.2/olmo2_unstructured_wanda_0.2_q16.gguf",
@@ -791,7 +801,7 @@ if __name__ =="__main__":
         client.start_server(model)
         time.sleep(400) # waiting is performed ob server side
         client.bench_speed()
-        # client.bench_perplexity()
+        client.bench_perplexity()
         client.save_to_file(f'./{args.results_path}/{client.model_id}')
         client.stop_server()
         time.sleep(120)

@@ -1,0 +1,55 @@
+from_quantized: adapter: None
+INFO  Loader: Auto dtype (CPU + Torch Fused): `torch.bfloat16`                 
+INFO  Estimated Quantization BPW (bits per weight): 4.475 bpw, based on [bits: 4, group_size: 64]
+INFO  Kernel: Auto-selection: adding candidate `TorchAtenLinear`               
+INFO  ExLlamaV2 GPTQ: compiling torch.ops JIT extension in `/root/.cache/gptqmodel/torch_extensions/exllamav2/9f1835f3565b1241`.
+INFO  ExLlamaV2 GPTQ: torch.ops JIT compilation failed in 0.6s (estimated ~35s, -34s); using fallback path.
+INFO  Kernel: Auto-selection: adding candidate `TorchFusedLinear`              
+INFO  Kernel: Auto-selection: adding candidate `TorchLinear`                   
+INFO  Kernel: candidates -> `[TorchAtenLinear, TorchFusedLinear, TorchLinear]` 
+INFO  Kernel: selected -> `TorchAtenLinear`.                                   
+INFO  Loader: device = DEVICE.CPU                                              
+INFO  Loader: Built map across 1 GPU(s), 20 entries. First 8: [('model.embed_tokens', 'cpu'), ('model.layers.0', 'cpu'), ('model.layers.1', 'cpu'), ('model.layers.2', 'cpu'), ('model.layers.3', 'cpu'), ('model.layers.4', 'cpu'), ('model.layers.5', 'cpu'), ('model.layers.6', 'cpu')]
+INFO  Loader: device_map = {'model.embed_tokens': 'cpu', 'model.layers.0': 'cpu', 'model.layers.1': 'cpu', 'model.layers.2': 'cpu', 'model.layers.3': 'cpu', 'model.layers.4': 'cpu', 'model.layers.5': 'cpu', 'model.layers.6': 'cpu', 'model.layers.7': 'cpu', 'model.layers.8': 'cpu', 'model.layers.9': 'cpu', 'model.layers.10': 'cpu', 'model.layers.11': 'cpu', 'model.layers.12': 'cpu', 'model.layers.13': 'cpu', 'model.layers.14': 'cpu', 'model.layers.15': 'cpu', 'lm_head': 'cpu', 'model.norm': 'cpu', 'model.rotary_emb': 'cpu'}
+INFO  Format: Converting `format` from `FORMAT.GPTQ` to internal `FORMAT.GPTQ_V2`.
+INFO  Format: Converting GPTQ v1 to v2                                         
+INFO  Kernel: Auto-selection: adding candidate `TorchAtenLinear`               
+INFO  Kernel: selected -> `TorchAtenLinear`.                                   
+INFO  Optimize: `TorchAtenLinear` compilation triggered.                       
+INFO  gc.collect() reclaimed 3 objects in 0.214s                               
+INFO  Model: Loaded `generation_config`: GenerationConfig {
+  "bos_token_id": 100257,
+  "eos_token_id": 100257,
+  "output_attentions": false,
+  "output_hidden_states": false,
+  "pad_token_id": 100277,
+  "use_cache": false
+}
+
+INFO  Model: Auto-fixed `generation_config` mismatch between model and `generation_config.json`.
+INFO  Model: Updated `generation_config`: GenerationConfig {
+  "do_sample": true,
+  "eos_token_id": 100257,
+  "pad_token_id": 100277
+}
+
+INFO  Kernel: loaded -> `[TorchAtenLinear]`                                    
+GPT-QModel OpenAi Server has started asynchronously at http://0.0.0.0:8080.
+INFO:     Started server process [44135]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+load_backend: loaded RPC backend from /root/llama.cpp/build/bin/libggml-rpc.so
+load_backend: loaded CPU backend from /root/llama.cpp/build/bin/libggml-cpu-haswell.so
+build: 7883 (83bcdf721) with GNU 11.4.0 for Linux x86_64
+system info: n_threads = 3, n_threads_batch = 3, total_threads = 5
+
+system_info: n_threads = 3 (n_threads_batch = 3) / 5 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+
+Running without SSL
+init: using 4 threads for HTTP server
+start: binding port with default address family
+start: couldn't bind HTTP server socket, hostname: 127.0.0.1, port: 8080
+[0msrv    operator(): operator(): cleaning up before exit...
+main: exiting due to HTTP server error
+[0m
