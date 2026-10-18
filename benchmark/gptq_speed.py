@@ -109,9 +109,9 @@ def _gptq_decode(model, tokenizer, prompt: str, decode_tokens: int, device: str)
                 **inputs,
                 max_new_tokens=decode_tokens,
                 do_sample=False, # differ from actual benchmark do_sample=True. see gptq_serve.log example run
-                use_cache=False # so it calculates prefill+decode
+                use_cache=True # so it calculates prefill+decode
             )
-        return generated.shape[-1]
+        return generated.shape[-1]- inputs["input_ids"].shape[-1]
     
     return run_once, None
 
@@ -162,7 +162,7 @@ def gptqmodel_speed(
                 if verbose:
                     print(f"Skipping CUDA - not available")
                 continue
-                
+            
             try:
                 # Ensure model is on correct device
                 if dev == "cuda" and hasattr(model, 'to'):
@@ -200,7 +200,7 @@ def gptqmodel_speed(
                 )
                 
                 decode_tokens_actual=sum(decode_tokens_samples)/len(decode_tokens_samples)
-                decode_samples=prefill_decode_samples-prefill_samples
+                decode_samples=[prefill_decode_samples[i]-prefill_samples[i] for i in range(len(prefill_samples))]
                 
                 # Create summary
                 decode_summary = TrialSummary(

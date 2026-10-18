@@ -8,6 +8,7 @@ import evaluate
 from openai import OpenAI
 from fastapi import HTTPException
 from gptq_speed import gptqmodel_speed
+import sys
 
 class RoleContent(BaseModel):
     role: str
@@ -105,7 +106,6 @@ class BenchLLMServer:
                 stderr=subprocess.STDOUT,
             )
         # set general stdout to log_file descriptor
-        import sys
         sys.stdout = self.log_file
         print(f"logs redirected to file {self.log_file_name}")
     
@@ -124,6 +124,7 @@ class BenchLLMServer:
             self.server_type=None
         except Exception as e:
             print(e)
+        sys.stdout=sys.__stdout__
     
     def setup_openai_client(self):
         self.llm_openai_client=OpenAI(base_url=f"http://localhost:{self.llm_port}/v1",api_key="")
@@ -158,7 +159,8 @@ class BenchLLMServer:
             clean_response['predicted_per_second']=response.timings['predicted_per_second']
         # manually bench speed for gptqmodel
         elif benchllmserver.server_type=="gptqmodel":
-            clean_response['chat']={'content':response.choices[0].text if response.choices[0].text else "",
+            print(response.choices[0])
+            clean_response['chat']={'content':response.choices[0].message.content if response.choices[0].message.content else "",
                                 'role':""}
             message=f"{request.messages[-2].content} {request.messages[-1].content}"
             response_speed=gptqmodel_speed(benchllmserver.gptqmodel,message)
@@ -178,15 +180,16 @@ class BenchLLMServer:
             # Run perplexity calculation
             ppl_llm_process = subprocess.Popen(
                 [benchllmserver.executable_ppl_path, '-m', benchllmserver.model_id, 
-                '--chunks', '1', '-f', temp_file], 
-                stdout=benchllmserver.log_file,
-                stderr=subprocess.STDOUT,
+                '--chunks', str(request.amount), '-f', temp_file], 
+                stdout=subprocess.PIPE, # log_file?
                 text=True
             )
-            stdout, stderr = ppl_llm_process.communicate()
+            stdoutt, stderr = ppl_llm_process.communicate()
             
             # Parse results
-            ppl_res = stdout[stdout.find('minutes'):stdout.rfind('estimate')]
+            ppl_res = stdoutt[stdoutt.find('minutes'):stdoutt.rfind('estimate')]
+            benchllmserver.log_file.write(ppl_res)
+            
             results = []
             for num in ppl_res.split(',')[:-1]:
                 num = num[3:]

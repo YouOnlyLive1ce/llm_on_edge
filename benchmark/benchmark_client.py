@@ -23,8 +23,8 @@ class BenchLLMClient:
         self.model_id=None
         self.server_type=None
         self.wiki_path=wiki_path
-        self.amount_samples=2
-        # self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
+        self.amount_samples=8 # tune parameter if ppl list is empty
+        self.dataset=load_dataset("hotpotqa/hotpot_qa", "fullwiki")
         self.results={
                         'answers':[],
                         'ppl':[],
@@ -98,7 +98,7 @@ class BenchLLMClient:
             data = {
                 "messages": conversation,
                 "max_tokens": 64,
-                "temperature": 0.05,
+                "temperature": 10,
                 "repetition_penalty":1.1,
             }
             
@@ -783,8 +783,8 @@ if __name__ =="__main__":
     # run all ggufs (original_q16, pruned_q16, pruned_qX) and /quantized/model_{gptq|awq}X.safetensors
     
     # models = [str(path.parent) for path in folder_path.rglob("quantize_config.json")] + [str(path) for path in folder_path.rglob("*.gguf")]
-    models=["./out/olmo2/quantized/olmo2_gptq_4",
-            "./out/smollm2/pruned/unstructured/sparsegpt/0.2/smollm2_unstructured_sparsegpt_0.2_q16.gguf"
+    models=["./out/smollm2/pruned/unstructured/sparsegpt/0.2/smollm2_unstructured_sparsegpt_0.2_q16.gguf",
+            "./out/olmo2/quantized/olmo2_gptq_4",
             # "./out/smollm2/pruned/unstructured/sparsegpt/0.5/smollm2_unstructured_sparsegpt_0.5_q16.gguf",
             # "./out/smollm2/pruned/unstructured/wanda/0.2/smollm2_unstructured_wanda_0.2_q16.gguf",
             # "./out/smollm2/pruned/unstructured/wanda/0.5/smollm2_unstructured_wanda_0.5_q16.gguf",
